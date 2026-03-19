@@ -6,7 +6,6 @@ import morgan from 'morgan';
 import compression from 'compression';
 import mongoSanitize from 'express-mongo-sanitize';
 import path from 'path';
-import mongoSanitize from 'express-mongo-sanitize';
 import { fileURLToPath } from 'url';
 import connectDB from './config/database.js';
 import errorHandler from './middleware/errorHandler.js';
