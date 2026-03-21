@@ -52,27 +52,24 @@ const QualitySelector = ({ qualities, selectedQuality, onQualityChange }) => {
       </button>
 
       {showMenu && (
-        <div className="absolute top-full right-0 mt-2 w-40 bg-dark-900 rounded-md shadow-xl border border-dark-700 py-1.5 z-50">
-          <div className="px-3 py-2 border-b border-dark-700">
-            <p className="text-xs font-medium text-gray-400">Quality</p>
-          </div>
+        <div className="absolute top-full right-0 mt-1 w-28 bg-dark-900 rounded border border-dark-700 py-1 z-50">
           {qualities.map((quality) => (
             <button
               key={quality}
               onClick={() => handleQualitySelect(quality)}
-              className="w-full flex items-center justify-between px-3 py-2 hover:bg-dark-800 transition text-left text-sm"
+              className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-dark-800 transition text-left text-xs"
             >
               <span
                 className={`${
                   selectedQuality === quality
-                    ? 'text-primary-400 font-medium'
+                    ? 'text-primary-400'
                     : 'text-gray-300'
                 }`}
               >
                 {quality}
               </span>
               {selectedQuality === quality && (
-                <FaCheck size={12} className="text-primary-400" />
+                <FaCheck size={10} className="text-primary-400" />
               )}
             </button>
           ))}

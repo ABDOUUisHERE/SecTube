@@ -43,27 +43,24 @@ const SpeedSelector = ({ playbackSpeed, onSpeedChange }) => {
       </button>
 
       {showMenu && (
-        <div className="absolute top-full right-0 mt-2 w-40 bg-dark-900 rounded-md shadow-xl border border-dark-700 py-1.5 z-50">
-          <div className="px-3 py-2 border-b border-dark-700">
-            <p className="text-xs font-medium text-gray-400">Playback Speed</p>
-          </div>
+        <div className="absolute top-full right-0 mt-1 w-28 bg-dark-900 rounded border border-dark-700 py-1 z-50">
           {speedOptions.map((speed) => (
             <button
               key={speed}
               onClick={() => handleSpeedSelect(speed)}
-              className="w-full flex items-center justify-between px-3 py-2 hover:bg-dark-800 transition text-left text-sm"
+              className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-dark-800 transition text-left text-xs"
             >
               <span
                 className={`${
                   playbackSpeed === speed
-                    ? 'text-primary-400 font-medium'
+                    ? 'text-primary-400'
                     : 'text-gray-300'
                 }`}
               >
                 {speed === 1 ? 'Normal' : `${speed}x`}
               </span>
               {playbackSpeed === speed && (
-                <FaCheck size={12} className="text-primary-400" />
+                <FaCheck size={10} className="text-primary-400" />
               )}
             </button>
           ))}

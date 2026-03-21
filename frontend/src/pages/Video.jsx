@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { formatDistanceToNow } from 'date-fns';
-import { FaThumbsUp, FaThumbsDown, FaShare, FaRegSmile, FaBell, FaRegBell, FaTwitter, FaLinkedin, FaFacebook, FaWhatsapp, FaTelegram, FaCopy, FaCheck, FaExclamationTriangle, FaBookmark, FaRegBookmark } from 'react-icons/fa';
+import { FaThumbsUp, FaThumbsDown, FaShare, FaRegSmile, FaBell, FaRegBell, FaTwitter, FaLinkedin, FaFacebook, FaWhatsapp, FaTelegram, FaCopy, FaCheck, FaExclamationTriangle, FaBookmark, FaRegBookmark, FaEllipsisV } from 'react-icons/fa';
 import { videoAPI, userAPI } from '../services/api';
 import VideoPlayer from '../components/VideoPlayer';
 import CommentItem from '../components/CommentItem';
@@ -22,8 +22,11 @@ const Video = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [activeVideoMenu, setActiveVideoMenu] = useState(null);
+  const [savedVideos, setSavedVideos] = useState({});
   const emojiButtonRef = useRef(null);
   const shareButtonRef = useRef(null);
+  const videoMenuRefs = useRef({});
 
   const { data: videoData, isLoading } = useQuery(
     ['video', videoId],
@@ -94,12 +97,90 @@ const Video = () => {
     }
   );
 
-  // Filter out current video from related videos
-  const relatedVideos = (relatedVideosData?.data?.data || []).filter(v => v._id !== videoId);
+  // Filter out current video from related videos (memoized to prevent infinite loops)
+  const relatedVideos = useMemo(() => {
+    return (relatedVideosData?.data?.data || []).filter(v => v._id !== videoId);
+  }, [relatedVideosData, videoId]);
 
   // Calculate dropdown positions
   const shareMenuPosition = useDropdownPosition(shareButtonRef, showShareMenu, 350);
   const emojiPickerPosition = useDropdownPosition(emojiButtonRef, showEmojiPicker, 300);
+
+  // Close video menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const isClickInside = Object.values(videoMenuRefs.current).some(
+        ref => ref && ref.contains(event.target)
+      );
+      if (!isClickInside) {
+        setActiveVideoMenu(null);
+      }
+    };
+
+    if (activeVideoMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [activeVideoMenu]);
+
+  // Handle save/unsave related video
+  const handleToggleSaveRelated = async (videoId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      addToast({ type: 'warning', message: 'Please login to save videos' });
+      return;
+    }
+
+    try {
+      const res = await userAPI.toggleSaveVideo(videoId);
+      setSavedVideos(prev => ({ ...prev, [videoId]: res.data.isSaved }));
+      addToast({
+        type: res.data.isSaved ? 'success' : 'info',
+        message: res.data.message
+      });
+      setActiveVideoMenu(null);
+    } catch (error) {
+      addToast({ type: 'error', message: 'Failed to update saved status' });
+    }
+  };
+
+  // Handle share related video
+  const handleShareRelated = (videoId, title, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const videoUrl = `${window.location.origin}/video/${videoId}`;
+    navigator.clipboard.writeText(videoUrl);
+    addToast({ type: 'success', message: 'Link copied to clipboard!' });
+    setActiveVideoMenu(null);
+  };
+
+  // Check saved status for related videos
+  // Create stable dependency from video IDs to prevent infinite loops
+  const relatedVideoIds = useMemo(() =>
+    relatedVideos.map(v => v._id).join(','),
+    [relatedVideos]
+  );
+
+  useEffect(() => {
+    const checkSavedStatus = async () => {
+      if (isAuthenticated && relatedVideos.length > 0) {
+        const statuses = {};
+        for (const vid of relatedVideos) {
+          try {
+            const res = await userAPI.checkSavedStatus(vid._id);
+            statuses[vid._id] = res.data.isSaved;
+          } catch (error) {
+            console.error('Error checking saved status:', error);
+          }
+        }
+        setSavedVideos(statuses);
+      }
+    };
+    checkSavedStatus();
+  }, [isAuthenticated, relatedVideoIds, relatedVideos]);
 
   const likeMutation = useMutation(() => videoAPI.likeVideo(videoId), {
     onSuccess: (response) => {
@@ -549,49 +630,49 @@ const Video = () => {
 
                   {/* Share dropdown menu */}
                   {showShareMenu && (
-                    <div className={`absolute right-0 ${getDropdownClasses(shareMenuPosition)} w-56 bg-dark-900 rounded-md shadow-xl border border-dark-700 py-2 z-50`}>
+                    <div className={`absolute right-0 ${getDropdownClasses(shareMenuPosition)} w-44 bg-dark-900 rounded border border-dark-700 py-1 z-50`}>
                       <button
                         onClick={handleCopyLink}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-dark-700 transition text-left"
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left"
                       >
-                        {linkCopied ? <FaCheck className="text-green-500" /> : <FaCopy />}
-                        <span className="text-sm">{linkCopied ? 'Link copied!' : 'Copy link'}</span>
+                        {linkCopied ? <FaCheck size={11} className="text-green-500" /> : <FaCopy size={11} />}
+                        <span className="text-xs">{linkCopied ? 'Copied!' : 'Copy link'}</span>
                       </button>
-                      <div className="h-px bg-dark-700 my-1"></div>
+                      <div className="h-px bg-dark-700 my-0.5"></div>
                       <button
                         onClick={() => handleShare('twitter')}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-dark-700 transition text-left"
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left"
                       >
-                        <FaTwitter className="text-[#1DA1F2]" />
-                        <span className="text-sm">Share on Twitter</span>
+                        <FaTwitter size={11} className="text-[#1DA1F2]" />
+                        <span className="text-xs">Twitter</span>
                       </button>
                       <button
                         onClick={() => handleShare('facebook')}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-dark-700 transition text-left"
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left"
                       >
-                        <FaFacebook className="text-[#1877F2]" />
-                        <span className="text-sm">Share on Facebook</span>
+                        <FaFacebook size={11} className="text-[#1877F2]" />
+                        <span className="text-xs">Facebook</span>
                       </button>
                       <button
                         onClick={() => handleShare('linkedin')}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-dark-700 transition text-left"
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left"
                       >
-                        <FaLinkedin className="text-[#0A66C2]" />
-                        <span className="text-sm">Share on LinkedIn</span>
+                        <FaLinkedin size={11} className="text-[#0A66C2]" />
+                        <span className="text-xs">LinkedIn</span>
                       </button>
                       <button
                         onClick={() => handleShare('whatsapp')}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-dark-700 transition text-left"
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left"
                       >
-                        <FaWhatsapp className="text-[#25D366]" />
-                        <span className="text-sm">Share on WhatsApp</span>
+                        <FaWhatsapp size={11} className="text-[#25D366]" />
+                        <span className="text-xs">WhatsApp</span>
                       </button>
                       <button
                         onClick={() => handleShare('telegram')}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-dark-700 transition text-left"
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left"
                       >
-                        <FaTelegram className="text-[#0088cc]" />
-                        <span className="text-sm">Share on Telegram</span>
+                        <FaTelegram size={11} className="text-[#0088cc]" />
+                        <span className="text-xs">Telegram</span>
                       </button>
                     </div>
                   )}
@@ -735,36 +816,73 @@ const Video = () => {
           <div className="hidden lg:block lg:col-span-3">
             <h3 className="text-lg font-semibold mb-4">Related videos</h3>
             {relatedVideos.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {relatedVideos.slice(0, 8).map((relatedVideo) => (
-                  <Link
-                    key={relatedVideo._id}
-                    to={`/video/${relatedVideo._id}`}
-                    className="flex gap-2 hover:bg-dark-800 p-2 rounded-lg transition"
-                  >
-                    <div className="relative flex-shrink-0 w-56">
-                      <img
-                        src={getThumbnailUrl(relatedVideo.thumbnail)}
-                        alt={relatedVideo.title}
-                        className="w-full aspect-video object-cover rounded-lg"
-                        onError={(e) => {
-                          e.target.src = getThumbnailUrl();
+                  <div key={relatedVideo._id} className="relative group">
+                    <Link
+                      to={`/video/${relatedVideo._id}`}
+                      className="flex gap-3"
+                    >
+                      <div className="relative flex-shrink-0 w-40">
+                        <img
+                          src={getThumbnailUrl(relatedVideo.thumbnail)}
+                          alt={relatedVideo.title}
+                          className="w-full aspect-video object-cover rounded"
+                          onError={(e) => {
+                            e.target.src = getThumbnailUrl();
+                          }}
+                        />
+                        <div className="absolute bottom-1 right-1 bg-black bg-opacity-80 px-1 py-0.5 rounded text-xs">
+                          {Math.floor(relatedVideo.duration / 60)}:{(relatedVideo.duration % 60).toString().padStart(2, '0')}
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-medium line-clamp-2 mb-1">{relatedVideo.title}</h4>
+                        <p className="text-xs text-gray-400 mb-1">{relatedVideo.uploader?.displayName}</p>
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <span>{relatedVideo.views >= 1000 ? `${(relatedVideo.views / 1000).toFixed(1)}K` : relatedVideo.views} views</span>
+                          <span>•</span>
+                          <span>{formatDistanceToNow(new Date(relatedVideo.uploadedAt), { addSuffix: true })}</span>
+                        </div>
+                      </div>
+                    </Link>
+
+                    {/* Three-dot menu */}
+                    <div
+                      ref={el => videoMenuRefs.current[relatedVideo._id] = el}
+                      className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setActiveVideoMenu(activeVideoMenu === relatedVideo._id ? null : relatedVideo._id);
                         }}
-                      />
-                      <div className="absolute bottom-1 right-1 bg-black bg-opacity-80 px-1 py-0.5 rounded text-xs">
-                        {Math.floor(relatedVideo.duration / 60)}:{(relatedVideo.duration % 60).toString().padStart(2, '0')}
-                      </div>
+                        className="p-2 hover:bg-dark-800 rounded-full transition"
+                      >
+                        <FaEllipsisV size={14} className="text-gray-400" />
+                      </button>
+
+                      {activeVideoMenu === relatedVideo._id && (
+                        <div className="absolute top-full right-0 mt-1 w-36 bg-dark-900 rounded border border-dark-700 py-1 z-50">
+                          <button
+                            onClick={(e) => handleToggleSaveRelated(relatedVideo._id, e)}
+                            className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left text-xs"
+                          >
+                            {savedVideos[relatedVideo._id] ? <FaBookmark size={11} className="text-primary-400" /> : <FaRegBookmark size={11} />}
+                            <span>{savedVideos[relatedVideo._id] ? 'Unsave' : 'Save'}</span>
+                          </button>
+                          <button
+                            onClick={(e) => handleShareRelated(relatedVideo._id, relatedVideo.title, e)}
+                            className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left text-xs"
+                          >
+                            <FaShare size={11} />
+                            <span>Share</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-base font-medium line-clamp-2 mb-1">{relatedVideo.title}</h4>
-                      <p className="text-sm text-gray-400 mb-1">{relatedVideo.uploader?.displayName}</p>
-                      <div className="flex items-center gap-1 text-sm text-gray-500">
-                        <span>{relatedVideo.views >= 1000 ? `${(relatedVideo.views / 1000).toFixed(1)}K` : relatedVideo.views} views</span>
-                        <span>•</span>
-                        <span>{formatDistanceToNow(new Date(relatedVideo.uploadedAt), { addSuffix: true })}</span>
-                      </div>
-                    </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             ) : (
