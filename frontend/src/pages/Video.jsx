@@ -11,6 +11,7 @@ import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
 import { getAvatarUrl, getThumbnailUrl } from '../config/constants';
 import { useDropdownPosition, getDropdownClasses } from '../hooks/useDropdownPosition';
+import sanitize from '../utils/sanitize';
 
 const Video = () => {
   const { videoId } = useParams();
@@ -534,7 +535,7 @@ const Video = () => {
             </div>
 
             {/* Video title */}
-            <h1 className="text-xl font-semibold mb-3">{video.title}</h1>
+            <h1 className="text-xl font-semibold mb-3">{sanitize(video.title)}</h1>
 
             {/* Video info */}
             <div className="flex items-center justify-between mb-4 gap-4">
@@ -549,7 +550,7 @@ const Video = () => {
                     }}
                   />
                   <div>
-                    <div className="font-medium">{video.uploader?.displayName || video.uploader?.username}</div>
+                    <div className="font-medium">{sanitize(video.uploader?.displayName || video.uploader?.username)}</div>
                     <div className="text-xs text-gray-400">
                       {video.uploader?.subscribers?.length || 0} subscribers
                     </div>
@@ -687,12 +688,12 @@ const Video = () => {
                 <span>•</span>
                 <span>{formatDistanceToNow(new Date(video.uploadedAt), { addSuffix: true })}</span>
                 <span>•</span>
-                <span className="bg-dark-800 px-2 py-0.5 rounded text-xs border border-dark-700">{video.category}</span>
-                <span className="bg-dark-800 px-2 py-0.5 rounded text-xs border border-dark-700">{video.difficulty}</span>
+                <span className="bg-dark-800 px-2 py-0.5 rounded text-xs border border-dark-700">{sanitize(video.category)}</span>
+                <span className="bg-dark-800 px-2 py-0.5 rounded text-xs border border-dark-700">{sanitize(video.difficulty)}</span>
               </div>
 
               <div className={`text-sm ${!showDescription && 'line-clamp-2'}`}>
-                {video.description}
+                {sanitize(video.description)}
               </div>
 
               {video.description.length > 100 && (
@@ -710,7 +711,7 @@ const Video = () => {
                   <div className="flex flex-wrap gap-2">
                     {video.toolsUsed.map((tool) => (
                       <span key={tool} className="bg-dark-800 px-2 py-0.5 rounded text-xs border border-dark-700">
-                        {tool}
+                        {sanitize(tool)}
                       </span>
                     ))}
                   </div>
@@ -837,8 +838,8 @@ const Video = () => {
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium line-clamp-2 mb-1">{relatedVideo.title}</h4>
-                        <p className="text-xs text-gray-400 mb-1">{relatedVideo.uploader?.displayName}</p>
+                        <h4 className="text-sm font-medium line-clamp-2 mb-1">{sanitize(relatedVideo.title)}</h4>
+                        <p className="text-xs text-gray-400 mb-1">{sanitize(relatedVideo.uploader?.displayName)}</p>
                         <div className="flex items-center gap-1 text-xs text-gray-500">
                           <span>{relatedVideo.views >= 1000 ? `${(relatedVideo.views / 1000).toFixed(1)}K` : relatedVideo.views} views</span>
                           <span>•</span>

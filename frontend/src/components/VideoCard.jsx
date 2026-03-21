@@ -9,6 +9,7 @@ import useToastStore from '../store/toastStore';
 import ConfirmDialog from './ConfirmDialog';
 import Z_INDEX from '../config/zIndex';
 import { useDropdownPosition, getDropdownClasses } from '../hooks/useDropdownPosition';
+import sanitize from '../utils/sanitize';
 
 const VideoCard = ({ video, showActions = false }) => {
   const [showMenu, setShowActionsMenu] = useState(false);
@@ -133,7 +134,7 @@ const VideoCard = ({ video, showActions = false }) => {
         <div className="flex-1 min-w-0 pr-6">
           <Link to={`/video/${video._id}`}>
             <h3 className="text-sm font-medium text-white line-clamp-2 mb-0.5 leading-snug hover:text-primary-400 transition-colors">
-              {video.title}
+              {sanitize(video.title)}
             </h3>
           </Link>
 
@@ -141,7 +142,7 @@ const VideoCard = ({ video, showActions = false }) => {
             to={`/channel/${video.uploader?.username}`}
             className="block text-xs text-gray-500 hover:text-gray-400 mb-0.5"
           >
-            {video.uploader?.displayName || video.uploader?.username}
+            {sanitize(video.uploader?.displayName || video.uploader?.username)}
           </Link>
 
           <div className="flex items-center gap-1 text-xs text-gray-500">

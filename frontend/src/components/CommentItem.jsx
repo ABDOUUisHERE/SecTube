@@ -7,6 +7,7 @@ import useToastStore from '../store/toastStore';
 import EmojiPicker from './EmojiPicker';
 import { getAvatarUrl } from '../config/constants';
 import { useDropdownPosition, getDropdownClasses } from '../hooks/useDropdownPosition';
+import sanitize from '../utils/sanitize';
 
 const CommentItem = ({ comment, videoUploaderId, onReplySubmit, level = 0 }) => {
   const { user, isAuthenticated } = useAuthStore();
@@ -115,7 +116,7 @@ const CommentItem = ({ comment, videoUploaderId, onReplySubmit, level = 0 }) => 
           {/* Header */}
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className="font-medium text-gray-200 text-sm">
-              {comment.user.displayName || comment.user.username}
+              {sanitize(comment.user.displayName || comment.user.username)}
             </span>
             {isAuthor && (
               <span className="bg-primary-600 text-white text-xs px-1.5 py-0.5 rounded font-medium border border-primary-700">
@@ -129,7 +130,7 @@ const CommentItem = ({ comment, videoUploaderId, onReplySubmit, level = 0 }) => 
 
           {/* Content */}
           <p className="text-gray-300 text-sm mb-2 break-words whitespace-pre-wrap leading-relaxed">
-            {comment.content}
+            {sanitize(comment.content)}
           </p>
 
           {/* Actions */}
