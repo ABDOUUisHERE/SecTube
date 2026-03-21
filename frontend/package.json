@@ -22,7 +22,7 @@
     "react-router-dom": "^6.21.0",
     "recharts": "^3.7.0",
     "remark-gfm": "^4.0.1",
-    "video.js": "^8.23.6",
+    "video.js": "^8.23.7",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
