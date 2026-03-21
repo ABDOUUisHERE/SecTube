@@ -119,20 +119,22 @@ export const useVideoKeyboardShortcuts = (
 
         // Decrease playback speed
         case '<':
-        case ',':
+        case ',': {
           e.preventDefault();
           const slowerSpeed = speedOptions.reverse().find(s => s < playbackSpeed) || speedOptions[0];
           handlers.handleSpeedChange(slowerSpeed);
           speedOptions.reverse(); // Restore original order
           break;
+        }
 
         // Increase playback speed
         case '>':
-        case '.':
+        case '.': {
           e.preventDefault();
           const fasterSpeed = speedOptions.find(s => s > playbackSpeed) || speedOptions[speedOptions.length - 1];
           handlers.handleSpeedChange(fasterSpeed);
           break;
+        }
 
         default:
           break;
