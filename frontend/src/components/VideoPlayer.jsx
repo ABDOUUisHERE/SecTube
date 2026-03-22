@@ -61,14 +61,14 @@ const VideoPlayer = ({ video }) => {
   // Show error if no video URL
   if (!videoUrl) {
     return (
-      <div className="relative w-full aspect-video bg-dark-800 rounded-md overflow-hidden flex items-center justify-center">
+      <div className="relative w-full aspect-video bg-dark-800 rounded-none sm:rounded-md overflow-hidden flex items-center justify-center">
         <p className="text-gray-400 text-sm">Video not available</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full bg-black rounded-md overflow-hidden group">
+    <div className="w-full bg-black rounded-none sm:rounded-md overflow-hidden group">
       <div className="relative">
         {/* Hide native controls play button */}
         <style>{`
@@ -110,6 +110,7 @@ const VideoPlayer = ({ video }) => {
           onQualityChange={setSelectedQuality}
           playbackSpeed={playbackSpeed}
           onSpeedChange={handleSpeedChange}
+          isPlaying={isPlaying}
         />
 
         {/* Keyboard shortcuts overlay */}

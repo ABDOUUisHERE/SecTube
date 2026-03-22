@@ -64,17 +64,17 @@ const Browse = () => {
   };
 
   return (
-    <div className="px-6 py-6 min-h-screen">
+    <div className="px-0 sm:px-4 md:px-6 py-4 sm:py-6 min-h-screen">
       {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Browse Videos</h1>
-        <p className="text-sm text-gray-400">
+      <div className="mb-6 sm:mb-8 px-3 sm:px-0">
+        <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">Browse Videos</h1>
+        <p className="text-xs sm:text-sm text-gray-400">
           Explore cybersecurity content from the community
         </p>
       </div>
 
       {/* Filters */}
-      <div className="bg-dark-900 border border-dark-800 rounded-lg p-6 mb-8">
+      <div className="bg-dark-900 border-y sm:border border-dark-800 rounded-none sm:rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
         <div className="flex flex-wrap items-center gap-6">
           <CustomSelect
             label="Category"
@@ -119,7 +119,7 @@ const Browse = () => {
 
       {/* Videos Grid */}
       {isLoading && page === 1 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-3 sm:gap-x-4 gap-y-6 sm:gap-y-8 px-3 sm:px-0">
           {[...Array(15)].map((_, i) => (
             <div key={i}>
               <div className="aspect-video bg-dark-800 rounded-md border border-dark-800 mb-2 animate-pulse"></div>
@@ -134,14 +134,14 @@ const Browse = () => {
           ))}
         </div>
       ) : data?.data?.data?.length === 0 ? (
-        <div className="py-20 text-center">
-          <FaFilter className="text-gray-700 mx-auto mb-4" size={48} />
-          <h2 className="text-xl font-medium text-white mb-2">No videos found</h2>
-          <p className="text-gray-500">Try adjusting your filters to find what you're looking for.</p>
+        <div className="py-12 sm:py-20 text-center px-3">
+          <FaFilter className="text-gray-700 mx-auto mb-4" size={40} />
+          <h2 className="text-lg sm:text-xl font-medium text-white mb-2">No videos found</h2>
+          <p className="text-sm text-gray-500">Try adjusting your filters to find what you're looking for.</p>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-3 sm:gap-x-4 gap-y-6 sm:gap-y-8 px-3 sm:px-0">
             {data?.data?.data?.map((video) => (
               <VideoCard key={video._id} video={video} />
             ))}

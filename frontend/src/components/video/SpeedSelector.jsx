@@ -35,20 +35,20 @@ const SpeedSelector = ({ playbackSpeed, onSpeedChange }) => {
     <div ref={menuRef} className="relative">
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="flex items-center gap-2 bg-black bg-opacity-80 hover:bg-opacity-90 text-white px-3 py-1.5 rounded-md text-sm font-medium transition border border-gray-700 shadow-lg backdrop-blur-sm"
+        className="flex items-center gap-1 sm:gap-1.5 bg-black bg-opacity-80 hover:bg-opacity-90 active:bg-opacity-95 text-white px-1.5 sm:px-2.5 py-1 sm:py-1.5 rounded text-[10px] sm:text-xs font-medium transition border border-gray-700 shadow-lg backdrop-blur-sm min-h-[28px] sm:min-h-[36px]"
         title="Playback speed"
       >
-        <FaTachometerAlt size={14} />
+        <FaTachometerAlt size={11} className="sm:w-[13px] sm:h-[13px]" />
         <span>{playbackSpeed}x</span>
       </button>
 
       {showMenu && (
-        <div className="absolute top-full right-0 mt-1 w-28 bg-dark-900 rounded border border-dark-700 py-1 z-50">
+        <div className="absolute top-full right-0 mt-1 w-20 sm:w-28 bg-dark-900 rounded border border-dark-700 py-1 z-50 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-dark-700 scrollbar-track-dark-900">
           {speedOptions.map((speed) => (
             <button
               key={speed}
               onClick={() => handleSpeedSelect(speed)}
-              className="w-full flex items-center justify-between px-2.5 py-1.5 hover:bg-dark-800 transition text-left text-xs"
+              className="w-full flex items-center justify-between px-2 sm:px-2.5 py-1.5 sm:py-1.5 hover:bg-dark-800 active:bg-dark-700 transition text-left text-[10px] sm:text-xs min-h-[32px] sm:min-h-[36px]"
             >
               <span
                 className={`${

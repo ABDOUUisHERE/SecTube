@@ -27,6 +27,7 @@ const Video = () => {
   const [savedVideos, setSavedVideos] = useState({});
   const emojiButtonRef = useRef(null);
   const shareButtonRef = useRef(null);
+  const mobileShareButtonRef = useRef(null);
   const videoMenuRefs = useRef({});
 
   const { data: videoData, isLoading } = useQuery(
@@ -365,7 +366,10 @@ const Video = () => {
   // Close share menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (shareButtonRef.current && !shareButtonRef.current.contains(event.target)) {
+      const isClickInsideDesktop = shareButtonRef.current && shareButtonRef.current.contains(event.target);
+      const isClickInsideMobile = mobileShareButtonRef.current && mobileShareButtonRef.current.contains(event.target);
+
+      if (!isClickInsideDesktop && !isClickInsideMobile) {
         setShowShareMenu(false);
       }
     };
@@ -524,33 +528,173 @@ const Video = () => {
   }
 
   return (
-    <div className="px-6 py-6">
+    <div className="px-0 sm:px-4 md:px-6 py-0 sm:py-4 md:py-6">
       <div className="mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-0 sm:gap-4 md:gap-6">
           {/* Main content */}
-          <div className="lg:col-span-9">
+          <div className="md:col-span-12 lg:col-span-9">
             {/* Video player */}
-            <div className="mb-4">
+            <div className="mb-3 sm:mb-4">
               <VideoPlayer video={video} />
             </div>
 
             {/* Video title */}
-            <h1 className="text-xl font-semibold mb-3">{sanitize(video.title)}</h1>
+            <h1 className="text-lg sm:text-xl font-semibold mb-3 px-3 sm:px-0">{sanitize(video.title)}</h1>
 
-            {/* Video info */}
-            <div className="flex items-center justify-between mb-4 gap-4">
-              <div className="flex items-center justify-between flex-1">
-                <Link to={`/channel/${video.uploader?.username}`} className="flex items-center gap-3">
+            {/* Mobile compact info - visible only on phones */}
+            <div className="block sm:hidden px-3 mb-4">
+              {/* Author, views, time */}
+              <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
+                <span className="text-white">{sanitize(video.uploader?.displayName || video.uploader?.username)}</span>
+                <span>•</span>
+                <span>{video.views} views</span>
+                <span>•</span>
+                <span>{formatDistanceToNow(new Date(video.uploadedAt), { addSuffix: true })}</span>
+              </div>
+
+              {/* Author image and action buttons */}
+              <div className="flex items-center gap-3">
+                {/* Author image */}
+                <Link to={`/channel/${video.uploader?.username}`}>
                   <img
                     src={getAvatarUrl(video.uploader?.avatar)}
                     alt={video.uploader?.displayName || video.uploader?.username}
-                    className="w-10 h-10 rounded-full"
+                    className="w-9 h-9 rounded-full"
+                    onError={(e) => {
+                      e.target.src = getAvatarUrl();
+                    }}
+                  />
+                </Link>
+
+                {/* Action buttons - icons only */}
+                <div className="flex items-center gap-2 flex-1 justify-end">
+                  {/* Subscribe button */}
+                  {user?._id !== video.uploader?._id && (
+                    <button
+                      onClick={handleSubscribeClick}
+                      disabled={!isAuthenticated || subscribeMutation.isLoading}
+                      className={`px-3 py-2 rounded-full transition border ${
+                        !isAuthenticated
+                          ? 'bg-dark-800 text-gray-500 cursor-not-allowed border-dark-700'
+                          : isSubscribed
+                          ? 'bg-dark-800 hover:bg-dark-700 text-gray-300 border-dark-700'
+                          : 'bg-primary-600 hover:bg-primary-700 text-white border-primary-700'
+                      }`}
+                      title={isSubscribed ? 'Subscribed' : 'Subscribe'}
+                    >
+                      {isSubscribed ? <FaBell size={14} /> : <FaRegBell size={14} />}
+                    </button>
+                  )}
+
+                  {/* Like/Dislike combined button */}
+                  <div className="flex items-center bg-dark-900 rounded-full border border-dark-700">
+                    <button
+                      onClick={() => likeMutation.mutate()}
+                      disabled={!isAuthenticated}
+                      className={`px-3 py-2 rounded-l-full transition ${
+                        isLiked ? 'text-primary-500' : 'text-gray-400 hover:bg-dark-800'
+                      }`}
+                      title={`${video?.likeCount || 0} likes`}
+                    >
+                      <FaThumbsUp size={14} />
+                    </button>
+                    <div className="w-px h-4 bg-dark-700"></div>
+                    <button
+                      onClick={() => dislikeMutation.mutate()}
+                      disabled={!isAuthenticated}
+                      className={`px-3 py-2 rounded-r-full transition ${
+                        isDisliked ? 'text-primary-500' : 'text-gray-400 hover:bg-dark-800'
+                      }`}
+                      title="Dislike"
+                    >
+                      <FaThumbsDown size={14} />
+                    </button>
+                  </div>
+
+                  {/* Save button */}
+                  <button
+                    onClick={() => saveMutation.mutate()}
+                    disabled={!isAuthenticated}
+                    className={`px-3 py-2 rounded-full transition border ${
+                      isSaved
+                        ? 'bg-dark-800 text-primary-500 border-primary-900/50'
+                        : 'bg-dark-900 text-gray-400 border-dark-700 hover:bg-dark-800'
+                    }`}
+                    title={isSaved ? 'Saved' : 'Save'}
+                  >
+                    {isSaved ? <FaBookmark size={14} /> : <FaRegBookmark size={14} />}
+                  </button>
+
+                  {/* Share button */}
+                  <div className="relative" ref={mobileShareButtonRef}>
+                    <button
+                      onClick={() => setShowShareMenu(!showShareMenu)}
+                      className="px-3 py-2 rounded-full transition border border-dark-700 bg-dark-900 text-gray-400 hover:bg-dark-800"
+                      title="Share"
+                    >
+                      <FaShare size={14} />
+                    </button>
+
+                    {/* Share dropdown menu for mobile */}
+                    {showShareMenu && (
+                      <div className="absolute top-full right-0 mt-1 w-44 bg-dark-900 rounded border border-dark-700 py-1 z-50">
+                        <button
+                          onClick={handleCopyLink}
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left"
+                        >
+                          {linkCopied ? <FaCheck size={11} className="text-green-500" /> : <FaCopy size={11} />}
+                          <span className="text-xs">{linkCopied ? 'Copied!' : 'Copy link'}</span>
+                        </button>
+                        <div className="h-px bg-dark-700 my-0.5"></div>
+                        <button
+                          onClick={() => handleShare('twitter')}
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left"
+                        >
+                          <FaTwitter size={11} className="text-[#1DA1F2]" />
+                          <span className="text-xs">Twitter</span>
+                        </button>
+                        <button
+                          onClick={() => handleShare('facebook')}
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left"
+                        >
+                          <FaFacebook size={11} className="text-[#1877F2]" />
+                          <span className="text-xs">Facebook</span>
+                        </button>
+                        <button
+                          onClick={() => handleShare('whatsapp')}
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left"
+                        >
+                          <FaWhatsapp size={11} className="text-[#25D366]" />
+                          <span className="text-xs">WhatsApp</span>
+                        </button>
+                        <button
+                          onClick={() => handleShare('telegram')}
+                          className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-dark-800 transition text-left"
+                        >
+                          <FaTelegram size={11} className="text-[#0088cc]" />
+                          <span className="text-xs">Telegram</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop/Tablet Video info - hidden on phones */}
+            <div className="hidden sm:flex flex-col sm:flex-col md:flex-row md:items-center justify-between mb-4 gap-3 md:gap-4 px-0 sm:px-0">
+              <div className="flex items-center justify-between flex-1">
+                <Link to={`/channel/${video.uploader?.username}`} className="flex items-center gap-2 sm:gap-3">
+                  <img
+                    src={getAvatarUrl(video.uploader?.avatar)}
+                    alt={video.uploader?.displayName || video.uploader?.username}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full"
                     onError={(e) => {
                       e.target.src = getAvatarUrl();
                     }}
                   />
                   <div>
-                    <div className="font-medium">{sanitize(video.uploader?.displayName || video.uploader?.username)}</div>
+                    <div className="text-sm sm:text-base font-medium">{sanitize(video.uploader?.displayName || video.uploader?.username)}</div>
                     <div className="text-xs text-gray-400">
                       {video.uploader?.subscribers?.length || 0} subscribers
                     </div>
@@ -562,7 +706,7 @@ const Video = () => {
                   <button
                     onClick={handleSubscribeClick}
                     disabled={!isAuthenticated || subscribeMutation.isLoading}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition disabled:opacity-50 text-sm font-medium border ${
+                    className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-md transition disabled:opacity-50 text-xs sm:text-sm font-medium border ${
                       !isAuthenticated
                         ? 'bg-dark-800 text-gray-500 cursor-not-allowed border-dark-700'
                         : isSubscribed
@@ -570,8 +714,8 @@ const Video = () => {
                         : 'bg-primary-600 hover:bg-primary-700 text-white border-primary-700 shadow-sm'
                     }`}
                   >
-                    {isSubscribed ? <FaBell /> : <FaRegBell />}
-                    <span className="text-sm font-medium">
+                    {isSubscribed ? <FaBell size={14} /> : <FaRegBell size={14} />}
+                    <span className="text-xs sm:text-sm font-medium">
                       {isSubscribed ? 'Subscribed' : 'Subscribe'}
                     </span>
                   </button>
@@ -580,52 +724,52 @@ const Video = () => {
 
               {/* Separator - only show when subscribe button is visible */}
               {user?._id !== video.uploader?._id && (
-                <div className="h-8 w-px bg-dark-700"></div>
+                <div className="hidden md:block h-8 w-px bg-dark-700"></div>
               )}
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <div className="flex items-center bg-dark-900 rounded-md border border-dark-700">
                   <button
                     onClick={() => likeMutation.mutate()}
                     disabled={!isAuthenticated}
-                    className={`flex items-center gap-2 px-3 py-1.5 hover:bg-dark-800 rounded-l-md disabled:opacity-50 transition text-sm font-medium ${
+                    className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 hover:bg-dark-800 rounded-l-md disabled:opacity-50 transition text-xs sm:text-sm font-medium ${
                       isLiked ? 'text-primary-500' : 'text-gray-400'
                     }`}
                   >
-                    <FaThumbsUp size={14} />
+                    <FaThumbsUp size={13} className="sm:w-[14px] sm:h-[14px]" />
                     <span>{video?.likeCount || 0}</span>
                   </button>
-                  <div className="w-px h-5 bg-dark-700"></div>
+                  <div className="w-px h-4 sm:h-5 bg-dark-700"></div>
                   <button
                     onClick={() => dislikeMutation.mutate()}
                     disabled={!isAuthenticated}
-                    className={`flex items-center gap-2 px-3 py-1.5 hover:bg-dark-800 rounded-r-md disabled:opacity-50 transition text-sm ${
+                    className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 hover:bg-dark-800 rounded-r-md disabled:opacity-50 transition text-xs sm:text-sm ${
                       isDisliked ? 'text-primary-500' : 'text-gray-400'
                     }`}
                   >
-                    <FaThumbsDown size={14} />
+                    <FaThumbsDown size={13} className="sm:w-[14px] sm:h-[14px]" />
                   </button>
                 </div>
 
                 <button
                   onClick={() => saveMutation.mutate()}
                   disabled={!isAuthenticated}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition border font-medium text-sm ${
+                  className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-md transition border font-medium text-xs sm:text-sm ${
                     isSaved
                       ? 'bg-dark-800 text-primary-500 border-primary-900/50'
                       : 'bg-dark-900 hover:bg-dark-800 text-gray-400 border-dark-700'
                   }`}
                 >
-                  {isSaved ? <FaBookmark size={14} /> : <FaRegBookmark size={14} />}
+                  {isSaved ? <FaBookmark size={13} className="sm:w-[14px] sm:h-[14px]" /> : <FaRegBookmark size={13} className="sm:w-[14px] sm:h-[14px]" />}
                   <span>{isSaved ? 'Saved' : 'Save'}</span>
                 </button>
 
                 <div className="relative" ref={shareButtonRef}>
                   <button
                     onClick={() => setShowShareMenu(!showShareMenu)}
-                    className="flex items-center gap-2 bg-dark-900 hover:bg-dark-800 px-3 py-1.5 rounded-md transition border border-dark-700 text-sm font-medium text-gray-400"
+                    className="flex items-center gap-1.5 sm:gap-2 bg-dark-900 hover:bg-dark-800 px-2.5 sm:px-3 py-1.5 rounded-md transition border border-dark-700 text-xs sm:text-sm font-medium text-gray-400"
                   >
-                    <FaShare size={14} />
+                    <FaShare size={13} className="sm:w-[14px] sm:h-[14px]" />
                     <span>Share</span>
                   </button>
 
@@ -682,24 +826,24 @@ const Video = () => {
             </div>
 
             {/* Description */}
-            <div className="bg-dark-900 rounded-md border border-dark-800 p-4 mb-4">
-              <div className="flex items-center gap-2 text-sm text-gray-400 mb-2">
-                <span>{video.views} views</span>
-                <span>•</span>
-                <span>{formatDistanceToNow(new Date(video.uploadedAt), { addSuffix: true })}</span>
-                <span>•</span>
-                <span className="bg-dark-800 px-2 py-0.5 rounded text-xs border border-dark-700">{sanitize(video.category)}</span>
-                <span className="bg-dark-800 px-2 py-0.5 rounded text-xs border border-dark-700">{sanitize(video.difficulty)}</span>
+            <div className="bg-dark-900 rounded-none sm:rounded-md border-y sm:border border-dark-800 p-3 sm:p-4 mb-3 sm:mb-4 mx-0 sm:mx-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-400 mb-2 flex-wrap">
+                <span className="hidden sm:inline">{video.views} views</span>
+                <span className="hidden sm:inline">•</span>
+                <span className="hidden sm:inline">{formatDistanceToNow(new Date(video.uploadedAt), { addSuffix: true })}</span>
+                <span className="hidden sm:inline">•</span>
+                <span className="bg-dark-800 px-1.5 sm:px-2 py-0.5 rounded text-xs border border-dark-700">{sanitize(video.category)}</span>
+                <span className="bg-dark-800 px-1.5 sm:px-2 py-0.5 rounded text-xs border border-dark-700">{sanitize(video.difficulty)}</span>
               </div>
 
-              <div className={`text-sm ${!showDescription && 'line-clamp-2'}`}>
+              <div className={`text-xs sm:text-sm ${!showDescription && 'line-clamp-2'}`}>
                 {sanitize(video.description)}
               </div>
 
               {video.description.length > 100 && (
                 <button
                   onClick={() => setShowDescription(!showDescription)}
-                  className="text-sm text-gray-400 hover:text-white mt-2"
+                  className="text-xs sm:text-sm text-gray-400 hover:text-white mt-2"
                 >
                   {showDescription ? 'Show less' : 'Show more'}
                 </button>
@@ -720,18 +864,18 @@ const Video = () => {
             </div>
 
             {/* Comments */}
-            <div>
-              <h2 className="text-lg font-medium mb-4">
+            <div className="px-3 sm:px-0">
+              <h2 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">
                 {commentsData?.data?.total || 0} Comments
               </h2>
 
               {isAuthenticated ? (
-                <form onSubmit={handleCommentSubmit} className="mb-8">
-                  <div className="flex gap-3">
+                <form onSubmit={handleCommentSubmit} className="mb-6 sm:mb-8">
+                  <div className="flex gap-2 sm:gap-3">
                     <img
                       src={getAvatarUrl(user?.avatar)}
                       alt="Your avatar"
-                      className="w-10 h-10 rounded-full flex-shrink-0 object-cover"
+                      className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex-shrink-0 object-cover"
                       onError={(e) => {
                         e.target.src = getAvatarUrl();
                       }}
@@ -742,7 +886,7 @@ const Video = () => {
                           value={comment}
                           onChange={(e) => setComment(e.target.value)}
                           placeholder="Add a comment..."
-                          className="w-full bg-dark-900 border border-dark-700 rounded-md px-3 py-2 pr-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none"
+                          className="w-full bg-dark-900 border border-dark-700 rounded-md px-2.5 sm:px-3 py-2 pr-9 sm:pr-10 text-xs sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none"
                           rows={3}
                           maxLength={1000}
                         />
@@ -766,21 +910,21 @@ const Video = () => {
                         </div>
                       )}
 
-                      <div className="flex justify-end gap-2 mt-3">
+                      <div className="flex justify-end gap-1.5 sm:gap-2 mt-2 sm:mt-3">
                         <button
                           type="button"
                           onClick={() => {
                             setComment('');
                             setShowEmojiPicker(false);
                           }}
-                          className="px-3 py-1.5 text-sm bg-dark-800 hover:bg-dark-700 rounded-md transition border border-dark-700 font-medium"
+                          className="px-2.5 sm:px-3 py-1.5 text-xs sm:text-sm bg-dark-800 hover:bg-dark-700 rounded-md transition border border-dark-700 font-medium"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
                           disabled={!comment.trim() || commentMutation.isLoading}
-                          className="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 rounded-md text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm"
+                          className="px-2.5 sm:px-3 py-1.5 bg-primary-600 hover:bg-primary-700 rounded-md text-xs sm:text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm"
                         >
                           {commentMutation.isLoading ? 'Posting...' : 'Comment'}
                         </button>
@@ -813,18 +957,18 @@ const Video = () => {
             </div>
           </div>
 
-          {/* Sidebar - Related videos */}
-          <div className="hidden lg:block lg:col-span-3">
-            <h3 className="text-lg font-semibold mb-4">Related videos</h3>
+          {/* Related videos - Hidden on mobile, horizontal on tablets, sidebar on desktop */}
+          <div className="hidden sm:block md:col-span-12 lg:col-span-3 px-0 sm:px-0">
+            <h3 className="text-base sm:text-lg font-semibold mb-3 md:mb-4">Related videos</h3>
             {relatedVideos.length > 0 ? (
-              <div className="space-y-3">
+              <div className="flex md:flex-row lg:flex-col gap-3 md:gap-4 lg:gap-3 overflow-x-auto md:overflow-x-auto lg:overflow-x-visible pb-3 md:pb-4 lg:pb-0 scrollbar-hide -mx-3 px-3 sm:mx-0 sm:px-0">
                 {relatedVideos.slice(0, 8).map((relatedVideo) => (
-                  <div key={relatedVideo._id} className="relative group">
+                  <div key={relatedVideo._id} className="relative group flex-shrink-0 md:w-64 lg:w-auto">
                     <Link
                       to={`/video/${relatedVideo._id}`}
-                      className="flex gap-3"
+                      className="flex md:flex-col lg:flex-row gap-2 md:gap-0 lg:gap-3"
                     >
-                      <div className="relative flex-shrink-0 w-40">
+                      <div className="relative flex-shrink-0 w-32 md:w-full lg:w-40">
                         <img
                           src={getThumbnailUrl(relatedVideo.thumbnail)}
                           alt={relatedVideo.title}
@@ -837,10 +981,10 @@ const Video = () => {
                           {Math.floor(relatedVideo.duration / 60)}:{(relatedVideo.duration % 60).toString().padStart(2, '0')}
                         </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium line-clamp-2 mb-1">{sanitize(relatedVideo.title)}</h4>
-                        <p className="text-xs text-gray-400 mb-1">{sanitize(relatedVideo.uploader?.displayName)}</p>
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <div className="flex-1 min-w-0 md:mt-2 lg:mt-0">
+                        <h4 className="text-xs sm:text-sm font-medium line-clamp-2 mb-0.5 md:mb-1">{sanitize(relatedVideo.title)}</h4>
+                        <p className="text-xs text-gray-400 mb-0.5 md:mb-1 hidden md:block">{sanitize(relatedVideo.uploader?.displayName)}</p>
+                        <div className="flex items-center gap-1 text-xs text-gray-500 hidden md:flex">
                           <span>{relatedVideo.views >= 1000 ? `${(relatedVideo.views / 1000).toFixed(1)}K` : relatedVideo.views} views</span>
                           <span>•</span>
                           <span>{formatDistanceToNow(new Date(relatedVideo.uploadedAt), { addSuffix: true })}</span>
@@ -851,7 +995,7 @@ const Video = () => {
                     {/* Three-dot menu */}
                     <div
                       ref={el => videoMenuRefs.current[relatedVideo._id] = el}
-                      className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-0 right-0 md:top-2 lg:top-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <button
                         onClick={(e) => {

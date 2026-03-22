@@ -86,7 +86,7 @@ const VideoCard = ({ video, showActions = false }) => {
     <div className="flex flex-col group relative">
       {/* Thumbnail */}
       <Link to={`/video/${video._id}`} className="relative">
-        <div className="relative aspect-video bg-dark-900 rounded-md overflow-hidden mb-2 border border-dark-800">
+        <div className="relative aspect-video bg-dark-900 rounded-md overflow-hidden mb-1.5 sm:mb-2 border border-dark-800">
           <img
             src={getThumbnailUrl(video.thumbnail)}
             alt={video.title}
@@ -96,7 +96,7 @@ const VideoCard = ({ video, showActions = false }) => {
             }}
           />
           {/* Duration badge */}
-          <div className="absolute bottom-1.5 right-1.5 bg-black bg-opacity-90 px-1.5 py-0.5 rounded text-xs font-medium text-white">
+          <div className="absolute bottom-1 sm:bottom-1.5 right-1 sm:right-1.5 bg-black bg-opacity-90 px-1 sm:px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-medium text-white">
             {formatDuration(video.duration)}
           </div>
 
@@ -117,13 +117,13 @@ const VideoCard = ({ video, showActions = false }) => {
       </Link>
 
       {/* Info */}
-      <div className="flex gap-2">
+      <div className="flex gap-1.5 sm:gap-2">
         {/* Channel avatar */}
         <Link to={`/channel/${video.uploader?.username}`} className="flex-shrink-0">
           <img
             src={getAvatarUrl(video.uploader?.avatar)}
             alt={video.uploader?.displayName || video.uploader?.username}
-            className="w-8 h-8 rounded-full border border-dark-800"
+            className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-dark-800"
             onError={(e) => {
               e.target.src = getAvatarUrl();
             }}
@@ -131,21 +131,21 @@ const VideoCard = ({ video, showActions = false }) => {
         </Link>
 
         {/* Video details */}
-        <div className="flex-1 min-w-0 pr-6">
+        <div className="flex-1 min-w-0 pr-5 sm:pr-6">
           <Link to={`/video/${video._id}`}>
-            <h3 className="text-sm font-medium text-white line-clamp-2 mb-0.5 leading-snug hover:text-primary-400 transition-colors">
+            <h3 className="text-xs sm:text-sm font-medium text-white line-clamp-2 mb-0.5 leading-snug hover:text-primary-400 transition-colors">
               {sanitize(video.title)}
             </h3>
           </Link>
 
           <Link
             to={`/channel/${video.uploader?.username}`}
-            className="block text-xs text-gray-500 hover:text-gray-400 mb-0.5"
+            className="block text-[11px] sm:text-xs text-gray-500 hover:text-gray-400 mb-0.5"
           >
             {sanitize(video.uploader?.displayName || video.uploader?.username)}
           </Link>
 
-          <div className="flex items-center gap-1 text-xs text-gray-500">
+          <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
             <span>{formatViews(video.views)} views</span>
             <span>•</span>
             <span>{formatDistanceToNow(new Date(video.uploadedAt), { addSuffix: true })}</span>

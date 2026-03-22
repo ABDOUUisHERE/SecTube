@@ -20,7 +20,9 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const userMenuRef = useRef(null);
+  const searchRef = useRef(null);
 
   const userMenuPosition = useDropdownPosition(userMenuRef, showUserMenu, 200);
 
@@ -38,10 +40,25 @@ const Navbar = () => {
     }
   }, [showUserMenu]);
 
+  // Close search when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearch(false);
+      }
+    };
+
+    if (showSearch) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showSearch]);
+
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setShowSearch(false);
     }
   };
 
@@ -57,64 +74,55 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-dark-900 border-b border-dark-800 sticky top-0" style={{ zIndex: Z_INDEX.NAVBAR }}>
-      <div className="px-4 h-14 flex items-center justify-between gap-4">
+    <>
+      <nav className="bg-dark-900 border-b border-dark-800 sticky top-0" style={{ zIndex: Z_INDEX.NAVBAR }}>
+        <div className="px-3 sm:px-4 h-14 flex items-center justify-between gap-2 sm:gap-4">
         {/* Left: Hamburger Menu & Logo */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={toggleSidebar}
-            className="text-gray-500 hover:text-gray-300 transition p-2 hover:bg-dark-800 rounded-md border border-transparent"
+            className="text-gray-500 hover:text-gray-300 transition p-1.5 sm:p-2 hover:bg-dark-800 rounded-md border border-transparent"
             aria-label="Toggle sidebar"
           >
-            <FaBars size={18} />
+            <FaBars size={16} className="sm:w-[18px] sm:h-[18px]" />
           </button>
-          <Link to="/" className="flex items-center gap-2 flex-shrink-0 group">
-            <img src="/logo.png" alt="SecTube Logo" className="h-10 w-auto" />
-            <span className="bg-primary-600/10 text-primary-500 border border-primary-500/20 px-1.5 py-0.5 rounded text-[10px] font-black tracking-widest uppercase">
+          <Link to="/" className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 group">
+            <img src="/logo.png" alt="SecTube Logo" className="h-8 sm:h-10 w-auto" />
+            <span className="hidden sm:inline-block bg-primary-600/10 text-primary-500 border border-primary-500/20 px-1.5 py-0.5 rounded text-[10px] font-black tracking-widest uppercase">
               Beta
             </span>
           </Link>
         </div>
 
-        {/* Center: Search */}
-        <div className="flex-1 max-w-2xl flex items-center gap-2">
-          <form onSubmit={handleSearch} className="flex-1">
-            <div className="flex">
-              <input
-                type="text"
-                placeholder="Search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 bg-dark-900 border border-dark-700 rounded-l-md px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-              />
-              <button
-                type="submit"
-                className="bg-dark-900 border border-l-0 border-dark-700 rounded-r-md px-4 py-1.5 hover:bg-dark-800 transition"
-              >
-                <FaSearch className="text-gray-500" size={14} />
-              </button>
-            </div>
-          </form>
+        {/* Center: Search Icon */}
+        <div className="flex-1 max-w-2xl flex items-center justify-end gap-1.5 sm:gap-2">
+          <button
+            onClick={() => setShowSearch(true)}
+            className="p-1.5 text-gray-500 hover:text-gray-300 transition hover:bg-dark-800 rounded-md"
+            title="Search"
+          >
+            <FaSearch size={16} className="sm:w-[18px] sm:h-[18px]" />
+          </button>
 
           {/* Ask AI Button (Desktop) */}
           <button
             onClick={toggleChatbot}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-primary-600/10 hover:bg-primary-600/20 text-primary-500 hover:text-primary-400 border border-primary-500/20 rounded-md text-sm font-medium transition-all duration-300 h-[34px]"
+            className="hidden md:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 bg-primary-600/10 hover:bg-primary-600/20 text-primary-500 hover:text-primary-400 border border-primary-500/20 rounded-md text-xs lg:text-sm font-medium transition-all duration-300 h-[34px]"
           >
-            <span>Ask AI</span>
+            <span className="hidden lg:inline">Ask AI</span>
             <BsStars size={16} />
           </button>
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-2">
-          {/* Ask AI Button (Mobile) */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Ask AI Button (Mobile/Tablet) */}
           <button
             onClick={toggleChatbot}
-            className="flex sm:hidden items-center justify-center p-1.5 text-gray-500 hover:text-primary-500 transition-colors"
+            className="flex md:hidden items-center justify-center p-1.5 text-gray-500 hover:text-primary-500 transition-colors"
             title="Ask AI"
           >
-            <BsStars size={20} />
+            <BsStars size={18} />
           </button>
 
           {isAuthenticated ? (
@@ -135,18 +143,18 @@ const Navbar = () => {
 
               {/* User Dropdown Menu */}
               {showUserMenu && (
-                <div className={`absolute right-0 ${getDropdownClasses(userMenuPosition)} w-56 bg-dark-900 rounded-md shadow-xl border border-dark-700 py-1.5 z-50`}>
+                <div className={`absolute right-0 ${getDropdownClasses(userMenuPosition)} w-48 sm:w-56 bg-dark-900 rounded-md shadow-xl border border-dark-700 py-1.5 z-50`}>
                   {/* User Info */}
-                  <div className="px-4 py-3 border-b border-dark-800">
+                  <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-dark-800">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <p className="text-sm font-medium text-white truncate">{user?.displayName || user?.username}</p>
+                      <p className="text-xs sm:text-sm font-medium text-white truncate">{user?.displayName || user?.username}</p>
                       {user?.role === 'admin' && (
                         <span className="bg-red-600/10 text-red-500 border border-red-500/20 px-1.5 py-0.5 rounded text-[8px] font-black tracking-widest uppercase animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.2)]">
                           Admin
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 truncate">@{user?.username}</p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 truncate">@{user?.username}</p>
                   </div>
 
                   {/* Menu Items */}
@@ -155,27 +163,27 @@ const Navbar = () => {
                       <Link
                         to="/admin"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-dark-800 transition text-sm text-gray-300 hover:text-white"
+                        className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-dark-800 transition text-xs sm:text-sm text-gray-300 hover:text-white"
                       >
-                        <FaGavel size={14} />
+                        <FaGavel size={12} className="sm:w-[14px] sm:h-[14px]" />
                         <span>Admin Dashboard</span>
                       </Link>
                     )}
                     <Link
                       to="/settings"
                       onClick={() => setShowUserMenu(false)}
-                      className="flex items-center gap-3 px-4 py-2 hover:bg-dark-800 transition text-sm text-gray-300 hover:text-white"
+                      className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-dark-800 transition text-xs sm:text-sm text-gray-300 hover:text-white"
                     >
-                      <FaCog size={14} />
+                      <FaCog size={12} className="sm:w-[14px] sm:h-[14px]" />
                       <span>Settings</span>
                     </Link>
                     {user?.isStreamer && (
                       <Link
                         to={`/channel/${user?.username}`}
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-3 px-4 py-2 hover:bg-dark-800 transition text-sm text-gray-300 hover:text-white"
+                        className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-dark-800 transition text-xs sm:text-sm text-gray-300 hover:text-white"
                       >
-                        <FaVideo size={14} />
+                        <FaVideo size={12} className="sm:w-[14px] sm:h-[14px]" />
                         <span>My Channel</span>
                       </Link>
                     )}
@@ -188,9 +196,9 @@ const Navbar = () => {
                         setShowUserMenu(false);
                         handleLogoutClick();
                       }}
-                      className="flex items-center gap-3 px-4 py-2 hover:bg-dark-800 transition text-sm text-red-500 hover:text-red-400 w-full"
+                      className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-dark-800 transition text-xs sm:text-sm text-red-500 hover:text-red-400 w-full"
                     >
-                      <FaSignOutAlt size={14} />
+                      <FaSignOutAlt size={12} className="sm:w-[14px] sm:h-[14px]" />
                       <span>Sign out</span>
                     </button>
                   </div>
@@ -201,20 +209,54 @@ const Navbar = () => {
             <>
               <Link
                 to="/login"
-                className="px-3 py-1.5 text-sm text-gray-300 hover:text-white font-medium border border-dark-700/50 rounded-md hover:bg-dark-800 transition"
+                className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-gray-300 hover:text-white font-medium border border-dark-700/50 rounded-md hover:bg-dark-800 transition"
               >
                 Sign in
               </Link>
               <Link
                 to="/register"
-                className="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 rounded-md text-sm font-medium text-white border border-primary-700 shadow-sm"
+                className="px-2 sm:px-3 py-1.5 bg-primary-600 hover:bg-primary-700 rounded-md text-xs sm:text-sm font-medium text-white border border-primary-700 shadow-sm"
               >
                 Sign up
               </Link>
             </>
           )}
         </div>
-      </div>
+        </div>
+      </nav>
+
+      {/* Search Overlay */}
+      {showSearch && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center pt-20 sm:pt-24 px-4"
+          onClick={() => setShowSearch(false)}
+        >
+          <div
+            ref={searchRef}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-3xl animate-in fade-in slide-in-from-top-4 duration-200"
+          >
+            <form onSubmit={handleSearch}>
+              <div className="flex shadow-2xl">
+                <input
+                  type="text"
+                  placeholder="Search videos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoFocus
+                  className="flex-1 bg-dark-900 border border-dark-700 hover:border-dark-600 rounded-l-lg px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base text-white placeholder-gray-500 focus:outline-none focus:border-gray-500 focus:ring-2 focus:ring-gray-600 transition-colors"
+                />
+                <button
+                  type="submit"
+                  className="bg-primary-600 hover:bg-primary-700 border border-primary-700 rounded-r-lg px-6 sm:px-8 py-3 sm:py-4 transition"
+                >
+                  <FaSearch className="text-white" size={18} />
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Logout Confirmation Dialog */}
       <ConfirmDialog
@@ -226,7 +268,7 @@ const Navbar = () => {
         confirmText="Logout"
         type="warning"
       />
-    </nav>
+    </>
   );
 };
 

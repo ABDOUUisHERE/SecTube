@@ -8,16 +8,20 @@ import SpeedSelector from './SpeedSelector';
  * @param {Function} onQualityChange - Quality change handler
  * @param {number} playbackSpeed - Current playback speed
  * @param {Function} onSpeedChange - Speed change handler
+ * @param {boolean} isPlaying - Whether video is currently playing
  */
 const VideoControls = ({
   qualities,
   selectedQuality,
   onQualityChange,
   playbackSpeed,
-  onSpeedChange
+  onSpeedChange,
+  isPlaying
 }) => {
   return (
-    <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+    <div className={`absolute top-2 sm:top-4 right-2 sm:right-4 z-10 transition-opacity duration-200 flex gap-1.5 sm:gap-2 ${
+      !isPlaying ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+    }`}>
       {/* Speed selector */}
       <SpeedSelector
         playbackSpeed={playbackSpeed}
