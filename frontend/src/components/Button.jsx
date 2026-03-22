@@ -25,9 +25,9 @@ const Button = ({
   };
 
   const sizeStyles = {
-    sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-5 py-2.5 text-base',
+    sm: 'px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs',
+    md: 'px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm',
+    lg: 'px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base',
   };
 
   const widthStyles = fullWidth ? 'w-full' : '';

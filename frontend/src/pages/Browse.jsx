@@ -67,15 +67,15 @@ const Browse = () => {
     <div className="px-0 sm:px-4 md:px-6 py-4 sm:py-6 min-h-screen">
       {/* Page Header */}
       <div className="mb-6 sm:mb-8 px-3 sm:px-0">
-        <h1 className="text-xl sm:text-2xl font-bold text-white mb-2">Browse Videos</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-white mb-1">Browse Videos</h1>
         <p className="text-xs sm:text-sm text-gray-400">
           Explore cybersecurity content from the community
         </p>
       </div>
 
       {/* Filters */}
-      <div className="bg-dark-900 border-y sm:border border-dark-800 rounded-none sm:rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
-        <div className="flex flex-wrap items-center gap-6">
+      <div className="bg-dark-900 border-y sm:border border-dark-800 rounded-none sm:rounded-lg p-3 sm:p-6 mb-6 sm:mb-8">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-6">
           <CustomSelect
             label="Category"
             icon={FaFilter}
@@ -109,8 +109,8 @@ const Browse = () => {
 
         {/* Results Count */}
         {data?.data?.total > 0 && (
-          <div className="mt-6 pt-6 border-t border-dark-800">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-500">
+          <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-dark-800">
+            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-500">
               <span className="text-primary-500">{data.data.total}</span> videos found
             </p>
           </div>
@@ -119,11 +119,11 @@ const Browse = () => {
 
       {/* Videos Grid */}
       {isLoading && page === 1 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-3 sm:gap-x-4 gap-y-6 sm:gap-y-8 px-3 sm:px-0">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-0 sm:gap-x-4 gap-y-6 sm:gap-y-8">
           {[...Array(15)].map((_, i) => (
             <div key={i}>
-              <div className="aspect-video bg-dark-800 rounded-md border border-dark-800 mb-2 animate-pulse"></div>
-              <div className="flex gap-2">
+              <div className="aspect-video bg-dark-800 rounded-none sm:rounded-md border-y sm:border border-dark-800 mb-2 animate-pulse"></div>
+              <div className="flex gap-2 px-3 sm:px-0">
                 <div className="w-8 h-8 bg-dark-800 rounded-full border border-dark-800 flex-shrink-0 animate-pulse"></div>
                 <div className="flex-1 min-w-0">
                   <div className="h-4 bg-dark-800 rounded animate-pulse w-full mb-0.5"></div>
@@ -136,20 +136,20 @@ const Browse = () => {
       ) : data?.data?.data?.length === 0 ? (
         <div className="py-12 sm:py-20 text-center px-3">
           <FaFilter className="text-gray-700 mx-auto mb-4" size={40} />
-          <h2 className="text-lg sm:text-xl font-medium text-white mb-2">No videos found</h2>
+          <h2 className="text-base sm:text-lg font-medium text-white mb-2">No videos found</h2>
           <p className="text-sm text-gray-500">Try adjusting your filters to find what you're looking for.</p>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-3 sm:gap-x-4 gap-y-6 sm:gap-y-8 px-3 sm:px-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-0 sm:gap-x-4 gap-y-6 sm:gap-y-8">
             {data?.data?.data?.map((video) => (
               <VideoCard key={video._id} video={video} />
             ))}
             {isLoading && page > 1 && (
               [...Array(5)].map((_, i) => (
                 <div key={`loading-${i}`}>
-                  <div className="aspect-video bg-dark-800 rounded-md border border-dark-800 mb-2 animate-pulse"></div>
-                  <div className="h-4 bg-dark-800 rounded animate-pulse w-3/4 mb-0.5"></div>
+                  <div className="aspect-video bg-dark-800 rounded-none sm:rounded-md border-y sm:border border-dark-800 mb-2 animate-pulse"></div>
+                  <div className="h-4 bg-dark-800 rounded animate-pulse w-3/4 mb-0.5 px-3 sm:px-0"></div>
                 </div>
               ))
             )}
@@ -157,17 +157,18 @@ const Browse = () => {
 
           {/* Pagination */}
           {data?.data?.pages > 1 && (
-            <div className="flex justify-center items-center gap-3 mt-12 mb-8">
+            <div className="flex justify-center items-center gap-2 sm:gap-3 mt-12 mb-8">
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="flex items-center gap-2 px-3 py-1.5 bg-dark-900 hover:bg-dark-800 border border-dark-700 rounded-md text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-dark-900 hover:bg-dark-800 border border-dark-700 rounded-md text-xs sm:text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <FaChevronLeft size={12} />
-                <span>Previous</span>
+                <FaChevronLeft size={10} className="sm:w-3 sm:h-3" />
+                <span className="hidden sm:inline">Previous</span>
+                <span className="sm:hidden">Prev</span>
               </button>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 {[...Array(data?.data?.pages)].map((_, idx) => {
                   const pageNum = idx + 1;
                   // Show only current page, 2 pages before and after
@@ -180,7 +181,7 @@ const Browse = () => {
                       <button
                         key={idx}
                         onClick={() => setPage(pageNum)}
-                        className={`w-8 h-8 flex items-center justify-center rounded-md text-sm font-medium transition border ${
+                        className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-md text-xs sm:text-sm font-medium transition border ${
                           page === pageNum
                             ? 'bg-primary-600 border-primary-700 text-white'
                             : 'bg-dark-900 border-dark-700 text-gray-400 hover:bg-dark-800 hover:text-white'
@@ -192,7 +193,7 @@ const Browse = () => {
                   }
                   // Show ellipsis
                   if (pageNum === page - 2 || pageNum === page + 2) {
-                    return <span key={idx} className="text-gray-600">...</span>;
+                    return <span key={idx} className="text-gray-600 text-xs sm:text-sm">...</span>;
                   }
                   return null;
                 })}
@@ -201,10 +202,10 @@ const Browse = () => {
               <button
                 onClick={() => setPage((p) => Math.min(data?.data?.pages, p + 1))}
                 disabled={page === data?.data?.pages}
-                className="flex items-center gap-2 px-3 py-1.5 bg-dark-900 hover:bg-dark-800 border border-dark-700 rounded-md text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-dark-900 hover:bg-dark-800 border border-dark-700 rounded-md text-xs sm:text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>Next</span>
-                <FaChevronRight size={12} />
+                <FaChevronRight size={10} className="sm:w-3 sm:h-3" />
               </button>
             </div>
           )}

@@ -68,18 +68,18 @@ const ForgotPassword = () => {
     <div className="min-h-screen flex flex-col md:flex-row bg-dark-950 overflow-hidden">
       {/* Left Side: Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6 bg-dark-950 z-10">
-        <div className="w-full max-w-md">
+        <div className="w-full md:w-[85%]">
           <div className="p-4 sm:p-8">
-            <div className="mb-8 text-center">
-              <h1 className="text-2xl font-bold text-white mb-2">Reset Password</h1>
-              <p className="text-sm text-gray-400">
+            <div className="mb-4 text-center">
+              <h1 className="text-xl font-bold text-white mb-1.5">Reset Password</h1>
+              <p className="text-xs text-gray-400">
                 Enter your email and we'll send you a link to reset your password.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2 text-gray-300">Email Address</label>
+                <label className="block text-xs font-medium mb-1.5 text-gray-300">Email Address</label>
                 <div className="relative group">
                   <FaEnvelope className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-500 transition-colors" size={14} />
                   <input
@@ -87,7 +87,7 @@ const ForgotPassword = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full bg-dark-900 border border-dark-700 rounded-md pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
+                    className="w-full bg-dark-900 border border-dark-700 rounded-md pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
                     placeholder="your@email.com"
                   />
                 </div>
@@ -96,7 +96,7 @@ const ForgotPassword = () => {
               <button
                 type="submit"
                 disabled={loading || countdown > 0}
-                className="w-full bg-primary-600 hover:bg-primary-700 py-2.5 rounded-md font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm"
+                className="w-full bg-primary-600 hover:bg-primary-700 py-2 rounded-md font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm"
               >
                 {loading 
                   ? 'Sending link...' 

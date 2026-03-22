@@ -48,12 +48,12 @@ const Channel = () => {
 
   if (channelLoading) {
     return (
-      <div className="px-6 py-6">
+      <div className="px-0 sm:px-6 py-6">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Channel header skeleton */}
-          <div className="bg-dark-900 rounded-md border border-dark-800 p-6">
+          <div className="bg-dark-900 rounded-none sm:rounded-md border-y sm:border border-dark-800 p-4 sm:p-6">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
-              <div className="w-28 h-28 bg-dark-800 rounded-full animate-pulse border border-dark-800"></div>
+              <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 bg-dark-800 rounded-full animate-pulse border border-dark-800"></div>
               <div className="flex-1 text-center md:text-left">
                 {/* Name */}
                 <div className="h-8 bg-dark-800 rounded animate-pulse w-48 mb-1 mx-auto md:mx-0"></div>
@@ -87,13 +87,13 @@ const Channel = () => {
           </div>
 
           {/* Videos section skeleton */}
-          <div>
+          <div className="px-3 sm:px-0">
             <div className="h-7 bg-dark-800 rounded animate-pulse w-24 mb-6"></div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-0 sm:gap-x-4 gap-y-8 -mx-3 sm:mx-0">
               {[...Array(8)].map((_, i) => (
                 <div key={i}>
-                  <div className="aspect-video bg-dark-800 rounded-md border border-dark-800 mb-2 animate-pulse"></div>
-                  <div className="flex gap-2">
+                  <div className="aspect-video bg-dark-800 rounded-none sm:rounded-md border-y sm:border border-dark-800 mb-2 animate-pulse"></div>
+                  <div className="flex gap-2 px-3 sm:px-0">
                     <div className="w-8 h-8 bg-dark-800 rounded-full border border-dark-800 flex-shrink-0 animate-pulse"></div>
                     <div className="flex-1 min-w-0">
                       <div className="h-4 bg-dark-800 rounded animate-pulse w-full mb-0.5"></div>
@@ -117,11 +117,11 @@ const Channel = () => {
     const isOwnProfile = user?.username === username;
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-        <FaVideo className="text-gray-700 mb-4" size={48} />
-        <h2 className="text-lg font-medium text-white mb-1">
+        <FaVideo className="text-gray-700 mb-4" size={40} />
+        <h2 className="text-base sm:text-lg font-medium text-white mb-1">
           {isOwnProfile ? "No Channel Created" : "Channel Not Found"}
         </h2>
-        <p className="text-gray-500 max-w-xs mx-auto">
+        <p className="text-sm text-gray-500 max-w-xs mx-auto">
           {isOwnProfile ? (
             <>
               You haven't set up your channel yet.{' '}
@@ -169,26 +169,26 @@ const Channel = () => {
   };
 
   return (
-    <div className="px-6 py-6">
+    <div className="px-0 sm:px-6 py-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="bg-dark-900 rounded-md border border-dark-800 p-6">
+        <div className="bg-dark-900 rounded-none sm:rounded-md border-y sm:border border-dark-800 p-4 sm:p-6">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-8">
             <img
               src={getAvatarUrl(channel.avatar)}
               alt={channel.displayName || channel.username}
-              className="w-28 h-28 rounded-full border border-dark-800"
+              className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-full border border-dark-800"
               onError={(e) => {
                 e.target.src = getAvatarUrl();
               }}
             />
 
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-2xl font-semibold mb-1">{channel.displayName || channel.username}</h1>
-              <p className="text-sm text-gray-500 mb-3">@{channel.username}</p>
+              <h1 className="text-lg sm:text-xl font-semibold mb-1">{channel.displayName || channel.username}</h1>
+              <p className="text-xs sm:text-sm text-gray-500 mb-3">@{channel.username}</p>
 
-              {channel.bio && <p className="text-sm text-gray-300 mb-4">{channel.bio}</p>}
+              {channel.bio && <p className="text-xs sm:text-sm text-gray-300 mb-4">{channel.bio}</p>}
 
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-4 text-sm text-gray-400">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-4 text-xs sm:text-sm text-gray-400">
                 <span>
                   <strong className="text-white">{channel.subscriberCount || 0}</strong> subscribers
                 </span>
@@ -276,7 +276,7 @@ const Channel = () => {
                 <button
                   onClick={handleSubscribe}
                   disabled={!isAuthenticated || subscribeMutation.isLoading}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium text-sm transition disabled:opacity-50 border ${
+                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-medium text-xs sm:text-sm transition disabled:opacity-50 border ${
                     !isAuthenticated
                       ? 'bg-dark-800 text-gray-500 cursor-not-allowed border-dark-700'
                       : isSubscribed
@@ -284,7 +284,7 @@ const Channel = () => {
                       : 'bg-primary-600 hover:bg-primary-700 text-white border-primary-700 shadow-sm'
                   }`}
                 >
-                  {isSubscribed ? <FaBell size={14} /> : <FaRegBell size={14} />}
+                  {isSubscribed ? <FaBell size={12} className="sm:w-[14px] sm:h-[14px]" /> : <FaRegBell size={12} className="sm:w-[14px] sm:h-[14px]" />}
                   {isSubscribed ? 'Subscribed' : 'Subscribe'}
                 </button>
               )}
@@ -292,15 +292,15 @@ const Channel = () => {
           </div>
         </div>
 
-        <div>
-          <h2 className="text-xl font-medium mb-6">Videos</h2>
+        <div className="px-3 sm:px-0">
+          <h2 className="text-lg sm:text-xl font-medium mb-6">Videos</h2>
 
           {videosLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-0 sm:gap-x-4 gap-y-8 -mx-3 sm:mx-0">
               {[...Array(8)].map((_, i) => (
                 <div key={i}>
-                  <div className="aspect-video bg-dark-800 rounded-md border border-dark-800 mb-2 animate-pulse"></div>
-                  <div className="flex gap-2">
+                  <div className="aspect-video bg-dark-800 rounded-none sm:rounded-md border-y sm:border border-dark-800 mb-2 animate-pulse"></div>
+                  <div className="flex gap-2 px-3 sm:px-0">
                     <div className="w-8 h-8 bg-dark-800 rounded-full border border-dark-800 flex-shrink-0 animate-pulse"></div>
                     <div className="flex-1 min-w-0">
                       <div className="h-4 bg-dark-800 rounded animate-pulse w-full mb-0.5"></div>
@@ -314,11 +314,11 @@ const Channel = () => {
             </div>
           ) : videosData?.data?.data?.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-xl text-gray-400">No videos yet</p>
+              <p className="text-base sm:text-lg text-gray-400">No videos yet</p>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-0 sm:gap-x-4 gap-y-8 -mx-3 sm:mx-0">
                 {videosData?.data?.data?.map((video) => (
                   <VideoCard 
                     key={video._id} 

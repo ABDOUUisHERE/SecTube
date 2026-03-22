@@ -163,16 +163,16 @@ const Register = () => {
 
       {/* Right Side: Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6 bg-dark-950 z-10 overflow-y-auto">
-        <div className="w-full max-w-md my-8">
-          <div className="p-4 sm:p-8">
-            <div className="mb-6 text-center">
-              <h1 className="text-2xl font-bold text-white mb-2">Create Account</h1>
-              <p className="text-sm text-gray-400">Join SecTube to start your cybersecurity journey</p>
+        <div className="w-full md:w-[85%] my-8">
+          <div className="px-4 sm:px-8 pb-4 sm:pb-8">
+            <div className="mb-4 text-center">
+              <h1 className="text-xl font-bold text-white mb-1.5">Create Account</h1>
+              <p className="text-xs text-gray-400">Join SecTube to start your cybersecurity journey</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-gray-300">Username</label>
+                <label className="block text-xs font-medium mb-1.5 text-gray-300">Username</label>
                 <div className="relative group">
                   <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 transition-colors" size={14} />
                   <input
@@ -182,7 +182,7 @@ const Register = () => {
                     onChange={handleChange}
                     required
                     pattern="[a-zA-Z0-9._-]+"
-                    className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
+                    className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
                     placeholder="username"
                   />
                 </div>
@@ -190,7 +190,7 @@ const Register = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-gray-300">Email Address</label>
+                <label className="block text-xs font-medium mb-1.5 text-gray-300">Email Address</label>
                 <div className="relative group">
                   <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 transition-colors" size={14} />
                   <input
@@ -199,14 +199,14 @@ const Register = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
+                    className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
                     placeholder="your@email.com"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-gray-300">Confirm Email</label>
+                <label className="block text-xs font-medium mb-1.5 text-gray-300">Confirm Email</label>
                 <div className="relative group">
                   <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 transition-colors" size={14} />
                   <input
@@ -215,14 +215,14 @@ const Register = () => {
                     value={formData.confirmEmail}
                     onChange={handleChange}
                     required
-                    className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
+                    className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
                     placeholder="confirm@email.com"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-gray-300">Password</label>
+                <label className="block text-xs font-medium mb-1.5 text-gray-300">Password</label>
                 <div className="relative group">
                   <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 transition-colors" size={14} />
                   <input
@@ -232,7 +232,7 @@ const Register = () => {
                     onChange={handleChange}
                     required
                     minLength="6"
-                    className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
+                    className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-10 py-2 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
                     placeholder="••••••••"
                   />
                   <button
@@ -246,7 +246,7 @@ const Register = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1.5 text-gray-300">Confirm Password</label>
+                <label className="block text-xs font-medium mb-1.5 text-gray-300">Confirm Password</label>
                 <div className="relative group">
                   <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 transition-colors" size={14} />
                   <input
@@ -256,7 +256,7 @@ const Register = () => {
                     onChange={handleChange}
                     required
                     minLength="6"
-                    className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
+                    className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-10 py-2 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
                     placeholder="••••••••"
                   />
                   <button
@@ -287,7 +287,7 @@ const Register = () => {
               <button
                 type="submit"
                 disabled={loading || !acceptedTerms}
-                className="w-full bg-primary-600 hover:bg-primary-700 py-2.5 rounded-md font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm mt-2"
+                className="w-full bg-primary-600 hover:bg-primary-700 py-2 rounded-md font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm mt-2"
               >
                 {loading ? (
                   <div className="flex items-center justify-center gap-2">
@@ -310,17 +310,17 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={handleGithubLogin}
-                  className="flex items-center justify-center gap-3 bg-dark-900 hover:bg-dark-800 border border-dark-700 py-2.5 rounded-md font-semibold text-sm transition-all shadow-sm"
+                  className="flex items-center justify-center gap-2 bg-dark-900 hover:bg-dark-800 border border-dark-700 py-2 rounded-md font-semibold text-sm transition-all shadow-sm"
                 >
-                  <FaGithub size={18} />
+                  <FaGithub size={16} />
                   <span>GitHub</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
-                  className="flex items-center justify-center gap-3 bg-dark-900 hover:bg-dark-800 border border-dark-700 py-2.5 rounded-md font-semibold text-sm transition-all shadow-sm"
+                  className="flex items-center justify-center gap-2 bg-dark-900 hover:bg-dark-800 border border-dark-700 py-2 rounded-md font-semibold text-sm transition-all shadow-sm"
                 >
-                  <FaGoogle size={18} className="text-red-500" />
+                  <FaGoogle size={16} className="text-red-500" />
                   <span>Google</span>
                 </button>
               </div>

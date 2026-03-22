@@ -126,6 +126,7 @@ const Settings = () => {
     confirmPassword: '',
   });
   const [showUpdatePasswords, setShowUpdatePasswords] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   // Mutations
   const passwordMutation = useMutation((data) => authAPI.updatePassword(data), {
@@ -329,115 +330,157 @@ const Settings = () => {
   };
 
   return (
-    <div className="px-6 py-10 max-w-7xl mx-auto">
-      <div className="flex flex-col lg:flex-row gap-12">
-        
+    <div className="px-3 sm:px-6 py-6 sm:py-10 max-w-7xl mx-auto pt-24 lg:pt-6">
+      <div className="flex flex-col lg:flex-row gap-6 sm:gap-12">
+
         {/* Left Side: Navigation */}
         <aside className="lg:w-[280px] flex-shrink-0">
-          <div className="sticky top-24 space-y-8">
-            <div className="flex flex-col items-center text-center px-4">
-              <div className="relative mb-4 group">
-                <img 
-                  src={avatarPreview || getAvatarUrl(user?.avatar)} 
-                  alt={user?.username} 
-                  className="w-24 h-24 rounded-full object-cover border-2 border-dark-800 transition-colors group-hover:border-primary-500"
+          <div className="fixed lg:sticky top-0 lg:top-24 left-0 right-0 lg:left-auto lg:right-auto bg-dark-950 z-20 border-b lg:border-0 border-dark-800 pb-3 lg:pb-0 px-3 sm:px-6 lg:px-0 pt-20 lg:pt-0">
+            {/* Collapse Toggle Button (Mobile/Tablet) */}
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              className="lg:hidden w-full flex items-center justify-between px-3 py-2 mb-3 bg-dark-900 hover:bg-dark-800 rounded-md transition"
+            >
+              <div className="flex items-center gap-2">
+                <img
+                  src={avatarPreview || getAvatarUrl(user?.avatar)}
+                  alt={user?.username}
+                  className="w-8 h-8 rounded-full object-cover border border-dark-800"
                   onError={(e) => e.target.src = getAvatarUrl()}
                 />
+                <div className="text-left">
+                  <p className="text-sm font-bold text-white">{user?.displayName || user?.username}</p>
+                  <p className="text-xs text-gray-500">@{user?.username}</p>
+                </div>
               </div>
-              <h2 className="text-lg font-bold text-white">{user?.displayName || user?.username}</h2>
-              <p className="text-sm text-gray-500 italic mt-1">@{user?.username}</p>
-            </div>
+              <FaChevronRight className={`text-gray-500 transition-transform ${sidebarCollapsed ? '' : 'rotate-90'}`} size={14} />
+            </button>
 
-            <nav className="space-y-1">
-              <div className="px-4 mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">Account</div>
-              <a 
-                href="#identity" 
-                onClick={() => setActiveSection('identity')}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-md transition text-sm font-medium ${
+            {/* Sidebar Content */}
+            <div className={`${sidebarCollapsed ? 'hidden' : 'block'} lg:block space-y-4 sm:space-y-8`}>
+              {/* Desktop Avatar (hidden on mobile) */}
+              <div className="hidden lg:flex flex-col items-center text-center px-2 sm:px-4">
+                <div className="relative mb-3 sm:mb-4 group">
+                  <img
+                    src={avatarPreview || getAvatarUrl(user?.avatar)}
+                    alt={user?.username}
+                    className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-dark-800 transition-colors group-hover:border-primary-500"
+                    onError={(e) => e.target.src = getAvatarUrl()}
+                  />
+                </div>
+                <h2 className="text-base sm:text-lg font-bold text-white">{user?.displayName || user?.username}</h2>
+                <p className="text-xs sm:text-sm text-gray-500 italic mt-0.5 sm:mt-1">@{user?.username}</p>
+              </div>
+
+            <nav className="space-y-0.5 sm:space-y-1">
+              <div className="px-2 sm:px-4 mb-1 sm:mb-2 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">Account</div>
+              <a
+                href="#identity"
+                onClick={() => {
+                  setActiveSection('identity');
+                  setSidebarCollapsed(true);
+                }}
+                className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-2.5 rounded-md transition text-xs sm:text-sm font-medium ${
                   activeSection === 'identity' ? 'bg-dark-900 text-white' : 'text-gray-400 hover:text-white hover:bg-dark-900'
                 }`}
               >
-                <FaUser size={14} /> Identity
+                <FaUser size={12} className="sm:w-[14px] sm:h-[14px]" /> Identity
               </a>
-              <a 
-                href="#expertise" 
-                onClick={() => setActiveSection('expertise')}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-md transition text-sm font-medium ${
+              <a
+                href="#expertise"
+                onClick={() => {
+                  setActiveSection('expertise');
+                  setSidebarCollapsed(true);
+                }}
+                className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-2.5 rounded-md transition text-xs sm:text-sm font-medium ${
                   activeSection === 'expertise' ? 'bg-dark-900 text-white' : 'text-gray-400 hover:text-white hover:bg-dark-900'
                 }`}
               >
-                <FaBug size={14} /> Expertise
+                <FaBug size={12} className="sm:w-[14px] sm:h-[14px]" /> Expertise
               </a>
-              <a 
-                href="#social" 
-                onClick={() => setActiveSection('social')}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-md transition text-sm font-medium ${
+              <a
+                href="#social"
+                onClick={() => {
+                  setActiveSection('social');
+                  setSidebarCollapsed(true);
+                }}
+                className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-2.5 rounded-md transition text-xs sm:text-sm font-medium ${
                   activeSection === 'social' ? 'bg-dark-900 text-white' : 'text-gray-400 hover:text-white hover:bg-dark-900'
                 }`}
               >
-                <FaLink size={14} /> Social Links
+                <FaLink size={12} className="sm:w-[14px] sm:h-[14px]" /> Social Links
               </a>
-              <a 
-                href="#security" 
-                onClick={() => setActiveSection('security')}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-md transition text-sm font-medium ${
+              <a
+                href="#security"
+                onClick={() => {
+                  setActiveSection('security');
+                  setSidebarCollapsed(true);
+                }}
+                className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-2.5 rounded-md transition text-xs sm:text-sm font-medium ${
                   activeSection === 'security' ? 'bg-dark-900 text-white' : 'text-gray-400 hover:text-white hover:bg-dark-900'
                 }`}
               >
-                <FaShieldAlt size={14} /> Security
+                <FaShieldAlt size={12} className="sm:w-[14px] sm:h-[14px]" /> Security
               </a>
-              
+
               {user?.isStreamer && (
                 <>
-                  <div className="px-4 mb-2 mt-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">Studio</div>
-                  <a 
-                    href="#upload" 
-                    onClick={() => setActiveSection('upload')}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-md transition text-sm font-medium ${
+                  <div className="px-2 sm:px-4 mb-1 sm:mb-2 mt-4 sm:mt-6 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">Studio</div>
+                  <a
+                    href="#upload"
+                    onClick={() => {
+                      setActiveSection('upload');
+                      setSidebarCollapsed(true);
+                    }}
+                    className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-2.5 rounded-md transition text-xs sm:text-sm font-medium ${
                       activeSection === 'upload' ? 'bg-dark-900 text-white' : 'text-gray-400 hover:text-white hover:bg-dark-900'
                     }`}
                   >
-                    <FaFileUpload size={14} /> Deploy Content
+                    <FaFileUpload size={12} className="sm:w-[14px] sm:h-[14px]" /> Deploy Content
                   </a>
                 </>
               )}
-              
-              <div className="px-4 mb-2 mt-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">Settings</div>
-              <a 
-                href="#streamer" 
-                onClick={() => setActiveSection('streamer')}
-                className={`flex items-center gap-3 px-4 py-2.5 rounded-md transition text-sm font-medium ${
+
+              <div className="px-2 sm:px-4 mb-1 sm:mb-2 mt-4 sm:mt-6 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-gray-600">Settings</div>
+              <a
+                href="#streamer"
+                onClick={() => {
+                  setActiveSection('streamer');
+                  setSidebarCollapsed(true);
+                }}
+                className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-2.5 rounded-md transition text-xs sm:text-sm font-medium ${
                   activeSection === 'streamer' ? 'bg-dark-900 text-white' : 'text-gray-400 hover:text-white hover:bg-dark-900'
                 }`}
               >
-                <FaVideo size={14} /> Creator Status
+                <FaVideo size={12} className="sm:w-[14px] sm:h-[14px]" /> Creator Status
               </a>
             </nav>
+            </div>
           </div>
         </aside>
 
         {/* Right Side: Content */}
-        <main className="flex-1 space-y-12">
-          
-          <form onSubmit={handleProfileSubmit} className="space-y-12">
-            
+        <main className="flex-1 space-y-8 sm:space-y-12">
+
+          <form onSubmit={handleProfileSubmit} className="space-y-8 sm:space-y-12">
+
             {/* Identity */}
             <div id="identity" className="scroll-mt-24">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-1 h-8 bg-primary-500 rounded-full"></div>
-                <h3 className="text-lg font-bold text-white uppercase tracking-widest">Public Identity</h3>
+              <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
+                <div className="w-0.5 sm:w-1 h-6 sm:h-8 bg-primary-500 rounded-full"></div>
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-white uppercase tracking-widest">Public Identity</h3>
               </div>
 
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row items-center gap-8 py-6 px-8 bg-dark-900 border border-dark-800 rounded-md">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-8 py-4 sm:py-6 px-4 sm:px-8 bg-dark-900 border border-dark-800 rounded-md">
                   <FileUpload
                     onChange={handleAvatarChange}
                     previewUrl={avatarPreview || getAvatarUrl(user?.avatar)}
                     variant="avatar"
                   />
                   <div className="text-center sm:text-left">
-                    <h4 className="font-bold text-gray-200">Change Profile Picture</h4>
-                    <p className="text-xs text-gray-500 mt-1">Recommended size: 400x400px</p>
+                    <h4 className="text-sm sm:text-base font-bold text-gray-200">Change Profile Picture</h4>
+                    <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 sm:mt-1">Recommended size: 400x400px</p>
                   </div>
                 </div>
 
@@ -474,12 +517,12 @@ const Settings = () => {
 
             {/* Expertise */}
             <div id="expertise" className="scroll-mt-24">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-1 h-8 bg-primary-500 rounded-full"></div>
-                <h3 className="text-lg font-bold text-white uppercase tracking-widest">Expertise</h3>
+              <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
+                <div className="w-0.5 sm:w-1 h-6 sm:h-8 bg-primary-500 rounded-full"></div>
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-white uppercase tracking-widest">Expertise</h3>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {specialtiesOptions.map((opt) => {
                   const isActive = formData.specialties.includes(opt);
                   return (
@@ -487,7 +530,7 @@ const Settings = () => {
                       key={opt}
                       type="button"
                       onClick={() => handleSpecialtyToggle(opt)}
-                      className={`px-4 py-2 rounded-md text-xs font-medium transition border ${
+                      className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-[10px] sm:text-xs font-medium transition border ${
                         isActive
                           ? 'bg-primary-600 border-primary-500 text-white'
                           : 'bg-dark-900 border-dark-800 text-gray-400 hover:border-dark-700'
@@ -502,9 +545,9 @@ const Settings = () => {
 
             {/* Socials */}
             <div id="social" className="scroll-mt-24">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-1 h-8 bg-primary-500 rounded-full"></div>
-                <h3 className="text-lg font-bold text-white uppercase tracking-widest">Social Links</h3>
+              <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
+                <div className="w-0.5 sm:w-1 h-6 sm:h-8 bg-primary-500 rounded-full"></div>
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-white uppercase tracking-widest">Social Links</h3>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -525,7 +568,7 @@ const Settings = () => {
                 type="submit"
                 loading={updateMutation.isLoading}
                 icon={FaSave}
-                className="px-10"
+                className="px-6 sm:px-10 text-xs sm:text-sm"
               >
                 Save Profile
               </Button>
@@ -533,21 +576,21 @@ const Settings = () => {
           </form>
 
           {/* Security (2FA & Password) */}
-          <div id="security" className="scroll-mt-24 space-y-8">
-            <div className="flex items-center gap-4">
-              <div className="w-1 h-8 bg-primary-500 rounded-full"></div>
-              <h3 className="text-lg font-bold text-white uppercase tracking-widest">Security Protocols</h3>
+          <div id="security" className="scroll-mt-24 space-y-4 sm:space-y-8">
+            <div className="flex items-center gap-2 sm:gap-4">
+              <div className="w-0.5 sm:w-1 h-6 sm:h-8 bg-primary-500 rounded-full"></div>
+              <h3 className="text-sm sm:text-base md:text-lg font-bold text-white uppercase tracking-widest">Security Protocols</h3>
             </div>
 
             {/* Password Update Card */}
-            <div className="bg-dark-900 border border-dark-800 rounded-md p-8">
-              <div className="flex items-center gap-4 mb-8 pb-6 border-b border-dark-800">
-                <div className="p-3 bg-primary-600/10 rounded-xl text-primary-500">
-                  <FaKey size={24} />
+            <div className="bg-dark-900 border border-dark-800 rounded-md p-4 sm:p-8">
+              <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-8 pb-4 sm:pb-6 border-b border-dark-800">
+                <div className="p-2 sm:p-3 bg-primary-600/10 rounded-xl text-primary-500 flex-shrink-0">
+                  <FaKey size={18} className="sm:w-5 sm:h-5 md:w-6 md:h-6" />
                 </div>
                 <div>
-                  <h4 className="text-white font-bold text-lg">Update Master Key</h4>
-                  <p className="text-sm text-gray-500">Authorized personnel only. Change your credentials to maintain operational security.</p>
+                  <h4 className="text-white font-bold text-sm sm:text-base md:text-lg">Update Master Key</h4>
+                  <p className="text-xs sm:text-sm text-gray-500">Authorized personnel only. Change your credentials to maintain operational security.</p>
                 </div>
               </div>
 
@@ -612,7 +655,7 @@ const Settings = () => {
                     type="submit"
                     loading={passwordMutation.isLoading}
                     disabled={!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
-                    className="px-10"
+                    className="px-6 sm:px-10 text-xs sm:text-sm"
                   >
                     Update Password
                   </Button>
@@ -621,34 +664,35 @@ const Settings = () => {
             </div>
 
             <div className="bg-dark-900 border border-dark-800 rounded-md overflow-hidden">
-              <div className="p-8 border-b border-dark-800">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-                  <div className="flex-1 space-y-2 text-center md:text-left">
-                    <div className="flex items-center justify-center md:justify-start gap-3 mb-1">
-                      <h4 className="text-white font-bold">Two-Factor Authentication</h4>
+              <div className="p-4 sm:p-8 border-b border-dark-800">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-8">
+                  <div className="flex-1 space-y-1 sm:space-y-2 text-center md:text-left">
+                    <div className="flex items-center justify-center md:justify-start gap-2 sm:gap-3 mb-0.5 sm:mb-1">
+                      <h4 className="text-white font-bold text-sm sm:text-base">Two-Factor Authentication</h4>
                       {user?.isTwoFactorEnabled ? (
-                        <span className="text-[10px] font-black bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full border border-green-500/20 tracking-widest">ENABLED</span>
+                        <span className="text-[9px] sm:text-[10px] font-black bg-green-500/10 text-green-500 px-1.5 sm:px-2 py-0.5 rounded-full border border-green-500/20 tracking-widest">ENABLED</span>
                       ) : (
-                        <span className="text-[10px] font-black bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full border border-red-500/20 tracking-widest">DISABLED</span>
+                        <span className="text-[9px] sm:text-[10px] font-black bg-red-500/10 text-red-500 px-1.5 sm:px-2 py-0.5 rounded-full border border-red-500/20 tracking-widest">DISABLED</span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 max-w-lg">Protect your account with an extra security layer. Once enabled, you'll need to provide a 6-digit code from your authenticator app to sign in.</p>
+                    <p className="text-xs sm:text-sm text-gray-500 max-w-lg">Protect your account with an extra security layer. Once enabled, you'll need to provide a 6-digit code from your authenticator app to sign in.</p>
                   </div>
 
                   {!user?.isTwoFactorEnabled && !show2FASetup && (
-                    <Button 
-                      onClick={() => setup2FAMutation.mutate()} 
+                    <Button
+                      onClick={() => setup2FAMutation.mutate()}
                       loading={setup2FAMutation.isLoading}
                       variant="primary"
+                      className="text-xs sm:text-sm px-4 sm:px-5"
                     >
                       Configure 2FA
                     </Button>
                   )}
 
                   {user?.isTwoFactorEnabled && (
-                    <button 
+                    <button
                       onClick={() => setShow2FADisableConfirm(true)}
-                      className="px-5 py-2.5 rounded-md bg-dark-800 border border-dark-700 text-sm font-bold text-red-500 hover:bg-red-500/10 transition-all shadow-sm"
+                      className="px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-md bg-dark-800 border border-dark-700 text-xs sm:text-sm font-bold text-red-500 hover:bg-red-500/10 transition-all shadow-sm"
                     >
                       Disable 2FA
                     </button>
@@ -658,45 +702,46 @@ const Settings = () => {
 
               {/* Step-by-Step Setup UI */}
               {!user?.isTwoFactorEnabled && show2FASetup && (
-                <div className="p-8 bg-dark-950/30">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div className="p-4 sm:p-8 bg-dark-950/30">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
                     {/* Step 1 */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 text-white font-bold text-sm">
-                        <span className="w-6 h-6 rounded-full bg-dark-800 border border-dark-700 flex items-center justify-center text-[10px]">1</span>
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="flex items-center gap-2 sm:gap-3 text-white font-bold text-xs sm:text-sm">
+                        <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-dark-800 border border-dark-700 flex items-center justify-center text-[9px] sm:text-[10px]">1</span>
                         Scan QR Code
                       </div>
-                      <div 
-                        className="bg-white p-3 rounded-xl inline-block shadow-2xl cursor-zoom-in hover:scale-[1.02] transition-transform"
+                      <div
+                        className="bg-white p-2 sm:p-3 rounded-xl inline-block shadow-2xl cursor-zoom-in hover:scale-[1.02] transition-transform"
                         onClick={() => setIsQRZoomed(true)}
                       >
-                        <img src={qrCode} alt="2FA QR Code" className="w-48 h-48" />
+                        <img src={qrCode} alt="2FA QR Code" className="w-36 h-36 sm:w-48 sm:h-48" />
                       </div>
-                      <p className="text-xs text-gray-500 leading-relaxed">Open your authenticator app and scan this code. Click image to enlarge.</p>
+                      <p className="text-[10px] sm:text-xs text-gray-500 leading-relaxed">Open your authenticator app and scan this code. Click image to enlarge.</p>
                     </div>
 
                     {/* Step 2 */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 text-white font-bold text-sm">
-                        <span className="w-6 h-6 rounded-full bg-dark-800 border border-dark-700 flex items-center justify-center text-[10px]">2</span>
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="flex items-center gap-2 sm:gap-3 text-white font-bold text-xs sm:text-sm">
+                        <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-dark-800 border border-dark-700 flex items-center justify-center text-[9px] sm:text-[10px]">2</span>
                         Enter Code
                       </div>
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         <div className="relative">
                           <FaKey className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" size={12} />
                           <input
                             type="text"
                             placeholder="000 000"
-                            className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-4 py-2.5 text-sm text-white tracking-[0.3em] font-bold focus:outline-none focus:border-primary-500 transition-all"
+                            className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-4 py-2 sm:py-2.5 text-xs sm:text-sm text-white tracking-[0.3em] font-bold focus:outline-none focus:border-primary-500 transition-all"
                             value={twoFactorToken}
                             onChange={(e) => setTwoFactorToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
                           />
                         </div>
-                        <Button 
-                          onClick={() => verify2FAMutation.mutate(twoFactorToken)} 
+                        <Button
+                          onClick={() => verify2FAMutation.mutate(twoFactorToken)}
                           loading={verify2FAMutation.isLoading}
                           disabled={twoFactorToken.length !== 6}
                           fullWidth
+                          className="text-xs sm:text-sm"
                         >
                           Verify & Activate
                         </Button>
@@ -704,17 +749,17 @@ const Settings = () => {
                     </div>
 
                     {/* Step 3 (Info) */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 text-white font-bold text-sm">
-                        <span className="w-6 h-6 rounded-full bg-dark-800 border border-dark-700 flex items-center justify-center text-[10px]">3</span>
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="flex items-center gap-2 sm:gap-3 text-white font-bold text-xs sm:text-sm">
+                        <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-dark-800 border border-dark-700 flex items-center justify-center text-[9px] sm:text-[10px]">3</span>
                         Secure Account
                       </div>
-                      <div className="p-4 bg-primary-600/5 border border-primary-500/10 rounded-xl">
-                        <p className="text-xs text-primary-400/80 leading-relaxed">Once verified, your account will be protected by military-grade TOTP encryption. Keep your device safe.</p>
+                      <div className="p-3 sm:p-4 bg-primary-600/5 border border-primary-500/10 rounded-xl">
+                        <p className="text-[10px] sm:text-xs text-primary-400/80 leading-relaxed">Once verified, your account will be protected by military-grade TOTP encryption. Keep your device safe.</p>
                       </div>
-                      <button 
+                      <button
                         onClick={() => setShow2FASetup(false)}
-                        className="text-xs text-gray-500 hover:text-white transition-colors"
+                        className="text-[10px] sm:text-xs text-gray-500 hover:text-white transition-colors"
                       >
                         Cancel Setup
                       </button>
@@ -727,13 +772,13 @@ const Settings = () => {
 
           {/* Unified Upload Section */}
           {user?.isStreamer && (
-            <div id="upload" className="scroll-mt-24 pt-12 border-t border-dark-800">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-1 h-8 bg-primary-500 rounded-full"></div>
-                <h3 className="text-lg font-bold text-white uppercase tracking-widest">Deploy Content</h3>
+            <div id="upload" className="scroll-mt-24 pt-8 sm:pt-12 border-t border-dark-800">
+              <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
+                <div className="w-0.5 sm:w-1 h-6 sm:h-8 bg-primary-500 rounded-full"></div>
+                <h3 className="text-sm sm:text-base md:text-lg font-bold text-white uppercase tracking-widest">Deploy Content</h3>
               </div>
 
-              <form onSubmit={handleUploadSubmit} className="space-y-12">
+              <form onSubmit={handleUploadSubmit} className="space-y-8 sm:space-y-12">
                 <div className="space-y-6">
                   <FileUpload
                     label="Video File"
@@ -840,12 +885,12 @@ const Settings = () => {
                   </div>
                 </div>
 
-                <div className="pt-4 space-y-4">
+                <div className="pt-4 space-y-3 sm:space-y-4">
                   {uploadMutation.isLoading && (
-                    <div className="bg-dark-900 border border-dark-800 rounded-lg p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-sm font-bold text-white uppercase tracking-widest">Uploading Byte Stream...</span>
-                        <span className="text-lg font-black text-primary-500">{uploadProgress}%</span>
+                    <div className="bg-dark-900 border border-dark-800 rounded-lg p-4 sm:p-6">
+                      <div className="flex items-center justify-between mb-3 sm:mb-4">
+                        <span className="text-xs sm:text-sm font-bold text-white uppercase tracking-widest">Uploading Byte Stream...</span>
+                        <span className="text-base sm:text-lg font-black text-primary-500">{uploadProgress}%</span>
                       </div>
                       <div className="w-full bg-dark-950 rounded-full h-2 overflow-hidden border border-dark-800">
                         <div
@@ -857,7 +902,7 @@ const Settings = () => {
                   )}
 
                   <div className="flex justify-end pt-4">
-                    <Button type="submit" disabled={uploadMutation.isLoading || !videoFile} loading={uploadMutation.isLoading} icon={FaUpload} className="px-10">Deploy Content</Button>
+                    <Button type="submit" disabled={uploadMutation.isLoading || !videoFile} loading={uploadMutation.isLoading} icon={FaUpload} className="px-6 sm:px-10 text-xs sm:text-sm">Deploy Content</Button>
                   </div>
                 </div>
               </form>
@@ -865,32 +910,32 @@ const Settings = () => {
           )}
 
           {/* Status/Control */}
-          <div id="streamer" className="scroll-mt-24 pt-12 border-t border-dark-800">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-1 h-8 bg-primary-500 rounded-full"></div>
-              <h3 className="text-lg font-bold text-white uppercase tracking-widest">Creator Status</h3>
+          <div id="streamer" className="scroll-mt-24 pt-8 sm:pt-12 border-t border-dark-800">
+            <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
+              <div className="w-0.5 sm:w-1 h-6 sm:h-8 bg-primary-500 rounded-full"></div>
+              <h3 className="text-sm sm:text-base md:text-lg font-bold text-white uppercase tracking-widest">Creator Status</h3>
             </div>
             {!user?.isStreamer ? (
-              <div className="bg-dark-900 border border-dark-800 rounded-md p-8 flex flex-col md:flex-row gap-8 items-center justify-between border-primary-900/20">
-                <div className="flex-1 space-y-2">
-                  <h3 className="text-lg font-bold text-white uppercase tracking-wider">Activate Streamer Mode</h3>
-                  <p className="text-xs text-gray-500">Required to upload research content and create a dedicated channel page.</p>
+              <div className="bg-dark-900 border border-dark-800 rounded-md p-4 sm:p-8 flex flex-col md:flex-row gap-4 sm:gap-8 items-center justify-between border-primary-900/20">
+                <div className="flex-1 space-y-1 sm:space-y-2">
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-white uppercase tracking-wider">Activate Streamer Mode</h3>
+                  <p className="text-[10px] sm:text-xs text-gray-500">Required to upload research content and create a dedicated channel page.</p>
                 </div>
-                <form onSubmit={handleUpgradeSubmit} className="flex flex-col gap-3 w-full md:w-auto">
+                <form onSubmit={handleUpgradeSubmit} className="flex flex-col gap-2 sm:gap-3 w-full md:w-auto">
                   <input
                     type="text"
                     placeholder="Channel Name"
                     maxLength={30}
-                    className="w-full md:w-[450px] bg-dark-950 border border-dark-700 rounded px-4 py-2.5 text-sm text-white focus:outline-none focus:border-primary-500 transition-colors disabled:opacity-50"
+                    className="w-full md:w-[450px] bg-dark-950 border border-dark-700 rounded px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-primary-500 transition-colors disabled:opacity-50"
                     value={upgradeData.channelName}
                     onChange={(e) => setUpgradeData({...upgradeData, channelName: e.target.value})}
                     disabled={!!user?.channelName}
                   />
                   <div className="flex justify-between items-center px-1">
-                    <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                    <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-widest font-bold">
                       {user?.channelName ? "Permanent Alias" : "Max 30 characters"}
                     </span>
-                    <span className={`text-[10px] font-bold ${upgradeData.channelName.length >= 30 ? 'text-red-500' : 'text-gray-500'}`}>
+                    <span className={`text-[9px] sm:text-[10px] font-bold ${upgradeData.channelName.length >= 30 ? 'text-red-500' : 'text-gray-500'}`}>
                       {upgradeData.channelName.length}/30
                     </span>
                   </div>
@@ -898,25 +943,26 @@ const Settings = () => {
                     type="submit"
                     loading={upgradeMutation.isLoading}
                     fullWidth
+                    className="text-xs sm:text-sm"
                   >
                     Activate Channel
                   </Button>
                 </form>
               </div>
             ) : (
-              <div className="bg-dark-900 border border-dark-800 rounded-md p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary-600/10 rounded-full text-primary-500">
-                    <FaShieldAlt size={24} />
+              <div className="bg-dark-900 border border-dark-800 rounded-md p-4 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div className="p-2 sm:p-3 bg-primary-600/10 rounded-full text-primary-500">
+                    <FaShieldAlt size={18} className="sm:w-5 sm:h-5 md:w-6 md:h-6" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white">Streamer Status Active</h3>
-                    <p className="text-sm text-gray-500">Channel: {user.channelName}</p>
+                    <h3 className="font-bold text-white text-sm sm:text-base">Streamer Status Active</h3>
+                    <p className="text-xs sm:text-sm text-gray-500">Channel: {user.channelName}</p>
                   </div>
                 </div>
-                <button 
+                <button
                   onClick={() => setShowDowngradeConfirm(true)}
-                  className="px-5 py-2.5 rounded-md bg-dark-800 border border-dark-700 text-sm font-bold text-red-500 hover:bg-red-500/10 hover:border-red-500/30 transition-all shadow-sm"
+                  className="px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-md bg-dark-800 border border-dark-700 text-xs sm:text-sm font-bold text-red-500 hover:bg-red-500/10 hover:border-red-500/30 transition-all shadow-sm"
                 >
                   Deactivate Channel
                 </button>
@@ -965,21 +1011,21 @@ const Settings = () => {
 
       {/* QR Code Zoom Modal */}
       {isQRZoomed && (
-        <div 
-          className="fixed inset-0 bg-black/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6"
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-md z-[2000] flex items-center justify-center p-4 sm:p-6"
           onClick={() => setIsQRZoomed(false)}
         >
-          <div className="relative bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full animate-fadeIn" onClick={e => e.stopPropagation()}>
-            <button 
+          <div className="relative bg-white p-4 sm:p-6 rounded-2xl shadow-2xl max-w-sm w-full animate-fadeIn" onClick={e => e.stopPropagation()}>
+            <button
               onClick={() => setIsQRZoomed(false)}
-              className="absolute -top-12 right-0 text-white hover:text-primary-400 transition-colors flex items-center gap-2 font-bold text-sm"
+              className="absolute -top-10 sm:-top-12 right-0 text-white hover:text-primary-400 transition-colors flex items-center gap-2 font-bold text-xs sm:text-sm"
             >
               <FaTimes /> Close
             </button>
             <img src={qrCode} alt="2FA QR Code Large" className="w-full h-auto" />
-            <div className="mt-4 text-center">
-              <p className="text-black font-bold text-sm">Authenticator Protocol</p>
-              <p className="text-gray-500 text-xs mt-1">Scan with Google Authenticator or Authy</p>
+            <div className="mt-3 sm:mt-4 text-center">
+              <p className="text-black font-bold text-xs sm:text-sm">Authenticator Protocol</p>
+              <p className="text-gray-500 text-[10px] sm:text-xs mt-1">Scan with Google Authenticator or Authy</p>
             </div>
           </div>
         </div>

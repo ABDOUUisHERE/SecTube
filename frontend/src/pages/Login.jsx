@@ -125,54 +125,54 @@ const Login = () => {
     <div className="min-h-screen flex flex-col md:flex-row bg-dark-950 overflow-hidden">
       {/* Left Side: Form (Reverted to previous design) */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6 bg-dark-950 z-10">
-        <div className="w-full max-w-md">
+        <div className="w-full md:w-[85%]">
           <div className="p-4 sm:p-8">
-            <div className="mb-8 text-center">
-              <h1 className="text-2xl font-bold text-white mb-2">
+            <div className="mb-6 text-center">
+              <h1 className="text-xl font-bold text-white mb-1.5">
                 {twoFactorRequired ? 'Two-Factor Auth' : 'Sign In'}
               </h1>
-              <p className="text-sm text-gray-400">
-                {twoFactorRequired 
-                  ? 'Enter the 6-digit code from your authenticator app.' 
+              <p className="text-xs text-gray-400">
+                {twoFactorRequired
+                  ? 'Enter the 6-digit code from your authenticator app.'
                   : 'Enter your credentials to access your account'}
               </p>
             </div>
 
             {twoFactorRequired ? (
-              <form onSubmit={handle2FASubmit} className="space-y-6">
+              <form onSubmit={handle2FASubmit} className="space-y-3">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-300">Verification Code</label>
+                  <label className="block text-xs font-medium mb-1.5 text-gray-300">Verification Code</label>
                   <input
                     type="text"
                     required
                     placeholder="000000"
-                    className="w-full bg-dark-900 border border-dark-700 rounded-md px-4 py-3 text-lg font-bold text-white text-center tracking-[0.5em] focus:outline-none focus:border-primary-500 transition-all"
+                    className="w-full bg-dark-900 border border-dark-700 rounded-md px-3 sm:px-4 py-2 text-sm sm:text-base font-bold text-white text-center tracking-[0.5em] focus:outline-none focus:border-primary-500 transition-all"
                     value={twoFactorToken}
                     onChange={(e) => setTwoFactorToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   />
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-1.5 sm:space-y-2">
                   <button
                     type="submit"
                     disabled={loading || twoFactorToken.length !== 6}
-                    className="w-full bg-primary-600 hover:bg-primary-700 py-2.5 rounded-md font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm"
+                    className="w-full bg-primary-600 hover:bg-primary-700 py-2 rounded-md font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm"
                   >
                     {loading ? 'Verifying...' : 'Verify & Sign In'}
                   </button>
                   <button
                     type="button"
                     onClick={() => setTwoFactorRequired(false)}
-                    className="w-full text-sm text-gray-500 hover:text-white transition-colors"
+                    className="w-full text-xs sm:text-sm text-gray-500 hover:text-white transition-colors"
                   >
                     Back to Login
                   </button>
                 </div>
               </form>
             ) : (
-                          <form onSubmit={handleSubmit} className="space-y-4">
+                          <form onSubmit={handleSubmit} className="space-y-3">
                             <div>
-                              <label className="block text-sm font-medium mb-2 text-gray-300">Email or Username</label>
+                              <label className="block text-xs font-medium mb-1.5 text-gray-300">Email or Username</label>
                               <div className="relative">
                                 <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={14} />
                                 <input
@@ -181,15 +181,15 @@ const Login = () => {
                                   value={formData.identifier}
                                   onChange={handleChange}
                                   required
-                                  className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-3 py-2.5 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
+                                  className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
                                   placeholder="your@email.com or username"
                                 />
                               </div>
                             </div>
                               <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="block text-sm font-medium text-gray-300">Password</label>
-                    <Link to="/forgot-password" size={14} className="text-xs text-primary-500 hover:text-primary-400 transition font-medium">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-medium text-gray-300">Password</label>
+                    <Link to="/forgot-password" size={14} className="text-[10px] text-primary-500 hover:text-primary-400 transition font-medium">
                       Forgot password?
                     </Link>
                   </div>
@@ -201,7 +201,7 @@ const Login = () => {
                       value={formData.password}
                       onChange={handleChange}
                       required
-                      className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-10 py-2.5 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
+                      className="w-full bg-dark-900 border border-dark-700 rounded-md pl-9 pr-10 py-2 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition text-white placeholder-gray-500"
                       placeholder="••••••••"
                     />
                     <button
@@ -231,7 +231,7 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-primary-600 hover:bg-primary-700 py-2.5 rounded-md font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm mt-2"
+                  className="w-full bg-primary-600 hover:bg-primary-700 py-2 rounded-md font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm mt-2"
                 >
                   {loading ? (
                     <div className="flex items-center justify-center gap-2">
@@ -254,17 +254,17 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={handleGithubLogin}
-                    className="flex items-center justify-center gap-3 bg-dark-900 hover:bg-dark-800 border border-dark-700 py-2.5 rounded-md font-semibold text-sm transition-all shadow-sm"
+                    className="flex items-center justify-center gap-2 bg-dark-900 hover:bg-dark-800 border border-dark-700 py-2 rounded-md font-semibold text-sm transition-all shadow-sm"
                   >
-                    <FaGithub size={18} />
+                    <FaGithub size={16} />
                     <span>GitHub</span>
                   </button>
                   <button
                     type="button"
                     onClick={handleGoogleLogin}
-                    className="flex items-center justify-center gap-3 bg-dark-900 hover:bg-dark-800 border border-dark-700 py-2.5 rounded-md font-semibold text-sm transition-all shadow-sm"
+                    className="flex items-center justify-center gap-2 bg-dark-900 hover:bg-dark-800 border border-dark-700 py-2 rounded-md font-semibold text-sm transition-all shadow-sm"
                   >
-                    <FaGoogle size={18} className="text-red-500" />
+                    <FaGoogle size={16} className="text-red-500" />
                     <span>Google</span>
                   </button>
                 </div>

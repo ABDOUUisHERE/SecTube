@@ -20,16 +20,18 @@ const Saved = () => {
 
   if (isLoading && page === 1) {
     return (
-      <div className="px-6 py-6 min-h-screen">
-        <div className="flex justify-between items-center mb-8">
+      <div className="px-0 sm:px-6 py-6 min-h-screen">
+        <div className="flex justify-between items-center mb-8 px-3 sm:px-0">
           <div className="h-8 w-48 bg-dark-900 animate-pulse rounded"></div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-0 sm:gap-x-4 gap-y-8">
           {[...Array(10)].map((_, i) => (
             <div key={i}>
-              <div className="aspect-video bg-dark-900 rounded-md mb-2 border border-dark-800 animate-pulse"></div>
-              <div className="h-4 bg-dark-900 rounded w-3/4 mb-1 animate-pulse"></div>
-              <div className="h-3 bg-dark-900 rounded w-1/2 animate-pulse"></div>
+              <div className="aspect-video bg-dark-900 rounded-none sm:rounded-md mb-2 border-y sm:border border-dark-800 animate-pulse"></div>
+              <div className="px-3 sm:px-0">
+                <div className="h-4 bg-dark-900 rounded w-3/4 mb-1 animate-pulse"></div>
+                <div className="h-3 bg-dark-900 rounded w-1/2 animate-pulse"></div>
+              </div>
             </div>
           ))}
         </div>
@@ -38,19 +40,19 @@ const Saved = () => {
   }
 
   return (
-    <div className="px-6 py-6 min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-white mb-2">Saved Videos</h1>
-        <p className="text-sm text-gray-400">
+    <div className="px-0 sm:px-6 py-6 min-h-screen">
+      <div className="mb-8 px-3 sm:px-0">
+        <h1 className="text-lg sm:text-xl font-semibold text-white mb-1">Saved Videos</h1>
+        <p className="text-xs sm:text-sm text-gray-400">
           Your collection of bookmarked videos
         </p>
       </div>
 
       {videos.length === 0 && !isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-          <FaBookmark className="text-gray-700 mb-4" size={48} />
-          <h2 className="text-lg font-medium text-white mb-1">No saved videos</h2>
-          <p className="text-gray-500 max-w-xs mx-auto mb-6">
+          <FaBookmark className="text-gray-700 mb-4" size={40} />
+          <h2 className="text-base sm:text-lg font-medium text-white mb-1">No saved videos</h2>
+          <p className="text-sm text-gray-500 max-w-xs mx-auto mb-6">
             Videos you save will appear here.
           </p>
           <Link
@@ -62,16 +64,18 @@ const Saved = () => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-0 sm:gap-x-4 gap-y-8">
             {videos.map((video) => (
               <VideoCard key={video._id} video={video} />
             ))}
             {isLoading && page > 1 && (
               [...Array(5)].map((_, i) => (
                 <div key={`loading-${i}`}>
-                  <div className="aspect-video bg-dark-900 rounded-md mb-2 border border-dark-800 animate-pulse"></div>
-                  <div className="h-4 bg-dark-900 rounded w-3/4 mb-1 animate-pulse"></div>
-                  <div className="h-3 bg-dark-900 rounded w-1/2 animate-pulse"></div>
+                  <div className="aspect-video bg-dark-900 rounded-none sm:rounded-md mb-2 border-y sm:border border-dark-800 animate-pulse"></div>
+                  <div className="px-3 sm:px-0">
+                    <div className="h-4 bg-dark-900 rounded w-3/4 mb-1 animate-pulse"></div>
+                    <div className="h-3 bg-dark-900 rounded w-1/2 animate-pulse"></div>
+                  </div>
                 </div>
               ))
             )}

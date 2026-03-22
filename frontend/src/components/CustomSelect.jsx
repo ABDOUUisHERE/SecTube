@@ -24,31 +24,31 @@ const CustomSelect = ({ label, icon: Icon, options, value, onChange }) => {
   const displayValue = typeof selectedOption === 'string' ? selectedOption : selectedOption?.label;
 
   return (
-    <div className="flex-1 min-w-[180px]" ref={dropdownRef}>
+    <div className="flex-1 min-w-[140px] sm:min-w-[180px]" ref={dropdownRef}>
       {label && (
-        <label className="flex items-center gap-2 text-xs font-medium text-gray-500 mb-2 uppercase tracking-widest">
-          {Icon && <Icon size={10} />}
+        <label className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-medium text-gray-500 mb-1.5 sm:mb-2 uppercase tracking-widest">
+          {Icon && <Icon size={9} className="sm:w-[10px] sm:h-[10px]" />}
           <span>{label}</span>
         </label>
       )}
-      
+
       <div className="relative">
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={`w-full flex items-center justify-between bg-dark-900 border ${
             isOpen ? 'border-primary-500 ring-1 ring-primary-500/20' : 'border-dark-700 hover:border-dark-600'
-          } rounded-md px-4 py-2.5 text-sm text-white transition-all duration-200`}
+          } rounded-md px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-white transition-all duration-200`}
         >
           <span className="truncate">{displayValue}</span>
-          <FaChevronDown 
-            size={10} 
-            className={`text-gray-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+          <FaChevronDown
+            size={9}
+            className={`text-gray-500 transition-transform duration-200 sm:w-[10px] sm:h-[10px] ${isOpen ? 'rotate-180' : ''}`}
           />
         </button>
 
         {isOpen && (
-          <div 
+          <div
             className="absolute left-0 right-0 mt-2 py-1 bg-dark-900 border border-dark-700 rounded-md shadow-2xl overflow-hidden animate-fadeIn"
             style={{ zIndex: Z_INDEX.DROPDOWN }}
           >
@@ -66,14 +66,14 @@ const CustomSelect = ({ label, icon: Icon, options, value, onChange }) => {
                       onChange(optValue);
                       setIsOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between px-4 py-2 text-sm text-left transition-colors ${
-                      isSelected 
-                        ? 'bg-primary-600/10 text-primary-400' 
+                    className={`w-full flex items-center justify-between px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-left transition-colors ${
+                      isSelected
+                        ? 'bg-primary-600/10 text-primary-400'
                         : 'text-gray-400 hover:bg-dark-800 hover:text-white'
                     }`}
                   >
                     <span>{optLabel}</span>
-                    {isSelected && <FaCheck size={10} className="text-primary-500" />}
+                    {isSelected && <FaCheck size={9} className="text-primary-500 sm:w-[10px] sm:h-[10px]" />}
                   </button>
                 );
               })}

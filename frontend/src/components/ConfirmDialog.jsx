@@ -37,7 +37,7 @@ const ConfirmDialog = ({
 
   return (
     <div
-      className="fixed flex items-center justify-center p-4 bg-black bg-opacity-50"
+      className="fixed flex items-center justify-center p-3 sm:p-4 bg-black bg-opacity-50"
       onClick={onClose}
       style={{
         top: '-50px',
@@ -51,23 +51,23 @@ const ConfirmDialog = ({
       }}
     >
       <div
-        className="bg-dark-900 border border-dark-800 rounded-md shadow-2xl max-w-md w-full p-5 animate-fadeIn"
+        className="bg-dark-900 border border-dark-800 rounded-lg shadow-2xl w-[90%] sm:w-full max-w-sm sm:max-w-md p-4 sm:p-5 animate-fadeIn mx-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start gap-3 mb-4">
-          <FaExclamationTriangle className={`${styles.icon} flex-shrink-0`} size={20} />
+        <div className="flex items-start gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <FaExclamationTriangle className={`${styles.icon} flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5`} />
           <div>
-            <h3 className="text-base font-semibold text-white mb-1">{title}</h3>
-            <p className="text-sm text-gray-400">{message}</p>
+            <h3 className="text-sm sm:text-base font-semibold text-white mb-1">{title}</h3>
+            <p className="text-xs sm:text-sm text-gray-400">{message}</p>
           </div>
         </div>
 
         {showInput && (
-          <div className="mt-4 px-1">
+          <div className="mt-3 sm:mt-4 px-0 sm:px-1">
             <input
               type={inputType}
               autoFocus
-              className="w-full bg-dark-950 border border-dark-700 rounded-md px-4 py-2 text-sm text-white focus:outline-none focus:border-primary-500 transition-all"
+              className="w-full bg-dark-950 border border-dark-700 rounded-md px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-primary-500 transition-all"
               placeholder={inputPlaceholder}
               value={inputValue}
               onChange={(e) => onInputChange(e.target.value)}
@@ -75,10 +75,10 @@ const ConfirmDialog = ({
           </div>
         )}
 
-        <div className="flex gap-2 justify-end mt-5">
+        <div className="flex gap-2 justify-end mt-4 sm:mt-5">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-dark-700 hover:bg-dark-600 rounded-md font-medium transition text-sm border border-dark-600"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 bg-dark-700 hover:bg-dark-600 rounded-md font-medium transition text-xs sm:text-sm border border-dark-600"
           >
             {cancelText}
           </button>
@@ -87,7 +87,7 @@ const ConfirmDialog = ({
               onConfirm(inputValue);
               onClose();
             }}
-            className={`px-4 py-2 ${styles.button} rounded-md font-medium transition text-sm border shadow-sm`}
+            className={`px-3 sm:px-4 py-1.5 sm:py-2 ${styles.button} rounded-md font-medium transition text-xs sm:text-sm border shadow-sm`}
           >
             {confirmText}
           </button>
