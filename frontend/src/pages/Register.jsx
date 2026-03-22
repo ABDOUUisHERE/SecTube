@@ -163,7 +163,7 @@ const Register = () => {
 
       {/* Right Side: Form */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6 bg-dark-950 z-10 overflow-y-auto">
-        <div className="w-full md:w-[85%] my-8">
+        <div className="w-full max-w-md my-8">
           <div className="px-4 sm:px-8 pb-4 sm:pb-8">
             <div className="mb-4 text-center">
               <h1 className="text-xl font-bold text-white mb-1.5">Create Account</h1>

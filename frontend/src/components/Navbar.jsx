@@ -94,15 +94,35 @@ const Navbar = () => {
           </Link>
         </div>
 
-        {/* Center: Search Icon */}
+        {/* Center: Search */}
         <div className="flex-1 max-w-2xl flex items-center justify-end gap-1.5 sm:gap-2">
+          {/* Search Icon (Mobile Only) */}
           <button
             onClick={() => setShowSearch(true)}
-            className="p-1.5 text-gray-500 hover:text-gray-300 transition hover:bg-dark-800 rounded-md"
+            className="md:hidden p-1.5 text-gray-500 hover:text-gray-300 transition hover:bg-dark-800 rounded-md"
             title="Search"
           >
             <FaSearch size={16} className="sm:w-[18px] sm:h-[18px]" />
           </button>
+
+          {/* Search Bar (Desktop) */}
+          <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-2xl">
+            <div className="flex w-full shadow-sm">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search videos..."
+                className="flex-1 bg-dark-950 border border-dark-700 hover:border-dark-600 rounded-l-md px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+              />
+              <button
+                type="submit"
+                className="bg-dark-800 hover:bg-dark-700 border border-l-0 border-dark-700 hover:border-dark-600 rounded-r-md px-4 transition-colors"
+              >
+                <FaSearch className="text-gray-400" size={16} />
+              </button>
+            </div>
+          </form>
 
           {/* Ask AI Button (Desktop) */}
           <button

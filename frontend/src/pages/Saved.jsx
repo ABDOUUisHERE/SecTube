@@ -21,16 +21,22 @@ const Saved = () => {
   if (isLoading && page === 1) {
     return (
       <div className="px-0 sm:px-6 py-6 min-h-screen">
-        <div className="flex justify-between items-center mb-8 px-3 sm:px-0">
-          <div className="h-8 w-48 bg-dark-900 animate-pulse rounded"></div>
+        <div className="mb-8 px-3 sm:px-0">
+          <div className="space-y-2">
+            <div className="h-6 sm:h-7 w-40 sm:w-48 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] animate-shimmer rounded"></div>
+            <div className="h-4 w-32 sm:w-40 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] animate-shimmer rounded"></div>
+          </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-0 sm:gap-x-4 gap-y-8">
-          {[...Array(10)].map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-0 sm:gap-x-4 gap-y-6 sm:gap-y-8">
+          {[...Array(5)].map((_, i) => (
             <div key={i}>
-              <div className="aspect-video bg-dark-900 rounded-none sm:rounded-md mb-2 border-y sm:border border-dark-800 animate-pulse"></div>
-              <div className="px-3 sm:px-0">
-                <div className="h-4 bg-dark-900 rounded w-3/4 mb-1 animate-pulse"></div>
-                <div className="h-3 bg-dark-900 rounded w-1/2 animate-pulse"></div>
+              <div className="aspect-video bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-none sm:rounded-md mb-2 border-y sm:border border-dark-800 animate-shimmer"></div>
+              <div className="flex gap-2 px-3 sm:px-0">
+                <div className="w-8 h-8 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-full border border-dark-800 flex-shrink-0 animate-shimmer"></div>
+                <div className="flex-1 space-y-1.5">
+                  <div className="h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded w-3/4 animate-shimmer"></div>
+                  <div className="h-3 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded w-1/2 animate-shimmer"></div>
+                </div>
               </div>
             </div>
           ))}
@@ -69,12 +75,15 @@ const Saved = () => {
               <VideoCard key={video._id} video={video} />
             ))}
             {isLoading && page > 1 && (
-              [...Array(5)].map((_, i) => (
+              [...Array(3)].map((_, i) => (
                 <div key={`loading-${i}`}>
-                  <div className="aspect-video bg-dark-900 rounded-none sm:rounded-md mb-2 border-y sm:border border-dark-800 animate-pulse"></div>
-                  <div className="px-3 sm:px-0">
-                    <div className="h-4 bg-dark-900 rounded w-3/4 mb-1 animate-pulse"></div>
-                    <div className="h-3 bg-dark-900 rounded w-1/2 animate-pulse"></div>
+                  <div className="aspect-video bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-none sm:rounded-md mb-2 border-y sm:border border-dark-800 animate-shimmer"></div>
+                  <div className="flex gap-2 px-3 sm:px-0">
+                    <div className="w-8 h-8 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-full border border-dark-800 flex-shrink-0 animate-shimmer"></div>
+                    <div className="flex-1 space-y-1.5">
+                      <div className="h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded w-3/4 animate-shimmer"></div>
+                      <div className="h-3 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded w-1/2 animate-shimmer"></div>
+                    </div>
                   </div>
                 </div>
               ))

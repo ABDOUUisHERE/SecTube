@@ -125,7 +125,7 @@ const Login = () => {
     <div className="min-h-screen flex flex-col md:flex-row bg-dark-950 overflow-hidden">
       {/* Left Side: Form (Reverted to previous design) */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-6 bg-dark-950 z-10">
-        <div className="w-full md:w-[85%]">
+        <div className="w-full max-w-md">
           <div className="p-4 sm:p-8">
             <div className="mb-6 text-center">
               <h1 className="text-xl font-bold text-white mb-1.5">

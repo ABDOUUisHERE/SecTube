@@ -7,6 +7,7 @@ import { videoAPI, userAPI } from '../services/api';
 import VideoPlayer from '../components/VideoPlayer';
 import CommentItem from '../components/CommentItem';
 import EmojiPicker from '../components/EmojiPicker';
+import LoadingSpinner from '../components/LoadingSpinner';
 import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
 import { getAvatarUrl, getThumbnailUrl } from '../config/constants';
@@ -382,61 +383,93 @@ const Video = () => {
 
   if (isLoading) {
     return (
-      <div className="px-6 py-6">
+      <div className="px-0 sm:px-4 md:px-6 py-0 sm:py-4 md:py-6">
         <div className="mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-0 sm:gap-4 md:gap-6">
             {/* Main content skeleton */}
-            <div className="lg:col-span-9">
+            <div className="md:col-span-12 lg:col-span-9">
               {/* Video player skeleton */}
-              <div className="aspect-video bg-dark-800 rounded-md animate-pulse mb-4"></div>
+              <div className="relative aspect-video bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-none sm:rounded-md overflow-hidden mb-3 sm:mb-4 border-y sm:border border-dark-800 animate-shimmer">
+                {/* Play icon placeholder */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-dark-700/50 flex items-center justify-center">
+                    <div className="w-0 h-0 border-l-[20px] sm:border-l-[24px] border-l-dark-600 border-y-[12px] sm:border-y-[14px] border-y-transparent ml-1"></div>
+                  </div>
+                </div>
+              </div>
 
               {/* Title skeleton */}
-              <div className="h-7 bg-dark-800 rounded animate-pulse mb-3 w-3/4"></div>
+              <div className="px-3 sm:px-0 mb-3">
+                <div className="h-5 sm:h-6 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-3/4"></div>
+              </div>
 
-              {/* Channel info and actions skeleton */}
-              <div className="flex items-center justify-between mb-4 gap-4">
+              {/* Mobile compact info skeleton - visible only on phones */}
+              <div className="block sm:hidden px-3 mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-3 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-32"></div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] border border-dark-800 animate-shimmer"></div>
+                  <div className="flex items-center gap-2 flex-1 justify-end">
+                    <div className="w-10 h-8 rounded-full bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] animate-shimmer"></div>
+                    <div className="w-20 h-8 rounded-full bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] animate-shimmer"></div>
+                    <div className="w-10 h-8 rounded-full bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] animate-shimmer"></div>
+                    <div className="w-10 h-8 rounded-full bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] animate-shimmer"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop/Tablet info skeleton - hidden on phones */}
+              <div className="hidden sm:flex flex-col sm:flex-col md:flex-row md:items-center justify-between mb-4 gap-3 md:gap-4 px-0 sm:px-0">
                 <div className="flex items-center justify-between flex-1">
                   {/* Channel info */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-dark-800 rounded-full animate-pulse"></div>
-                    <div>
-                      <div className="h-6 bg-dark-800 rounded animate-pulse w-32 mb-1"></div>
-                      <div className="h-4 bg-dark-800 rounded animate-pulse w-24"></div>
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] border border-dark-800 animate-shimmer"></div>
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <div className="h-4 sm:h-5 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-32"></div>
+                      <div className="h-3 sm:h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-24"></div>
                     </div>
                   </div>
                   {/* Subscribe button skeleton */}
-                  <div className="h-8 bg-dark-800 rounded-md animate-pulse w-28"></div>
+                  <div className="h-8 sm:h-9 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-md animate-shimmer w-24 sm:w-28"></div>
                 </div>
                 {/* Separator */}
-                <div className="h-8 w-px bg-dark-700"></div>
+                <div className="hidden md:block h-8 w-px bg-dark-700"></div>
                 {/* Action buttons skeleton */}
-                <div className="flex items-center gap-2">
-                  <div className="h-8 bg-dark-800 rounded-md animate-pulse w-24"></div>
-                  <div className="h-8 bg-dark-800 rounded-md animate-pulse w-20"></div>
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <div className="h-8 sm:h-9 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-md animate-shimmer w-24"></div>
+                  <div className="h-8 sm:h-9 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-md animate-shimmer w-20"></div>
+                  <div className="h-8 sm:h-9 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-md animate-shimmer w-20"></div>
                 </div>
               </div>
 
               {/* Description skeleton */}
-              <div className="bg-dark-900 border border-dark-800 rounded-md p-4 mb-4">
-                <div className="h-5 bg-dark-800 rounded mb-2 w-full animate-pulse"></div>
-                <div className="h-5 bg-dark-800 rounded mb-2 w-5/6 animate-pulse"></div>
-                <div className="h-5 bg-dark-800 rounded w-4/6 animate-pulse"></div>
+              <div className="bg-dark-900 rounded-none sm:rounded-md border-y sm:border border-dark-800 p-3 sm:p-4 mb-3 sm:mb-4 mx-0 sm:mx-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-2 flex-wrap">
+                  <div className="h-5 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-16"></div>
+                  <div className="h-5 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-16"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-full"></div>
+                  <div className="h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-5/6"></div>
+                  <div className="h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-4/6"></div>
+                </div>
               </div>
 
               {/* Comments section */}
-              <div>
+              <div className="px-3 sm:px-0">
                 {/* Comments title skeleton */}
-                <div className="h-7 bg-dark-800 rounded animate-pulse w-32 mb-4"></div>
+                <div className="h-5 sm:h-6 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-28 mb-3 sm:mb-4"></div>
 
-                {/* Comment form skeleton (when authenticated) */}
-                <div className="mb-8">
-                  <div className="flex gap-3">
-                    <div className="w-10 h-10 bg-dark-800 rounded-full animate-pulse flex-shrink-0"></div>
-                    <div className="flex-1">
-                      <div className="h-20 bg-dark-800 rounded-md animate-pulse mb-3"></div>
-                      <div className="flex justify-end gap-2">
-                        <div className="h-8 bg-dark-800 rounded-md animate-pulse w-20"></div>
-                        <div className="h-8 bg-dark-800 rounded-md animate-pulse w-24"></div>
+                {/* Comment form skeleton */}
+                <div className="mb-6 sm:mb-8">
+                  <div className="flex gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] border border-dark-800 flex-shrink-0 animate-shimmer"></div>
+                    <div className="flex-1 space-y-2 sm:space-y-3">
+                      <div className="h-16 sm:h-20 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-md animate-shimmer"></div>
+                      <div className="flex justify-end gap-1.5 sm:gap-2">
+                        <div className="h-7 sm:h-8 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-md animate-shimmer w-16 sm:w-20"></div>
+                        <div className="h-7 sm:h-8 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-md animate-shimmer w-20 sm:w-24"></div>
                       </div>
                     </div>
                   </div>
@@ -447,14 +480,14 @@ const Video = () => {
 
                 {/* Comments list skeleton */}
                 <div className="space-y-1">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex gap-2.5 py-2">
-                      <div className="w-8 h-8 bg-dark-800 rounded-full animate-pulse flex-shrink-0"></div>
-                      <div className="flex-1">
-                        <div className="h-4 bg-dark-800 rounded animate-pulse w-40 mb-1"></div>
-                        <div className="h-4 bg-dark-800 rounded animate-pulse w-full mb-1"></div>
-                        <div className="h-4 bg-dark-800 rounded animate-pulse w-3/4 mb-2"></div>
-                        <div className="h-3 bg-dark-800 rounded animate-pulse w-24"></div>
+                  {[1, 2].map((i) => (
+                    <div key={i} className="flex gap-2 sm:gap-2.5 py-2">
+                      <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] border border-dark-800 flex-shrink-0 animate-shimmer"></div>
+                      <div className="flex-1 space-y-1">
+                        <div className="h-3 sm:h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-32 sm:w-40"></div>
+                        <div className="h-3 sm:h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-full"></div>
+                        <div className="h-3 sm:h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-3/4"></div>
+                        <div className="h-2.5 sm:h-3 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-20 sm:w-24"></div>
                       </div>
                     </div>
                   ))}
@@ -463,19 +496,20 @@ const Video = () => {
             </div>
 
             {/* Related videos sidebar skeleton */}
-            <div className="hidden lg:block lg:col-span-3">
-              <div className="h-7 bg-dark-800 rounded animate-pulse w-32 mb-4"></div>
-              <div className="space-y-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="flex gap-2 p-2">
-                    <div className="relative flex-shrink-0 w-56">
-                      <div className="w-full aspect-video bg-dark-800 rounded-lg animate-pulse"></div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="h-5 bg-dark-800 rounded animate-pulse w-full mb-1"></div>
-                      <div className="h-5 bg-dark-800 rounded animate-pulse w-3/4 mb-1"></div>
-                      <div className="h-4 bg-dark-800 rounded animate-pulse w-2/3 mb-1"></div>
-                      <div className="h-4 bg-dark-800 rounded animate-pulse w-1/2"></div>
+            <div className="hidden sm:block md:col-span-12 lg:col-span-3 px-0 sm:px-0">
+              <div className="h-5 sm:h-6 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-28 sm:w-32 mb-3 md:mb-4"></div>
+              <div className="flex md:flex-row lg:flex-col gap-3 md:gap-4 lg:gap-3 overflow-x-auto md:overflow-x-auto lg:overflow-x-visible pb-3 md:pb-4 lg:pb-0 scrollbar-hide">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex-shrink-0 md:w-64 lg:w-auto">
+                    <div className="flex md:flex-col lg:flex-row gap-2 md:gap-0 lg:gap-3">
+                      <div className="relative flex-shrink-0 w-32 md:w-full lg:w-40">
+                        <div className="w-full aspect-video bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded border border-dark-800 animate-shimmer"></div>
+                      </div>
+                      <div className="flex-1 min-w-0 md:mt-2 lg:mt-0 space-y-1 md:space-y-1.5">
+                        <div className="h-3 sm:h-3.5 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-full"></div>
+                        <div className="h-3 sm:h-3.5 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-4/5"></div>
+                        <div className="h-2.5 sm:h-3 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-3/5 hidden md:block"></div>
+                      </div>
                     </div>
                   </div>
                 ))}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery } from 'react-query';
 import { videoAPI } from '../services/api';
 import VideoCard from '../components/VideoCard';
+import VideoCardSkeleton from '../components/VideoCardSkeleton';
 
 const categories = [
   'All',
@@ -65,17 +66,8 @@ const Home = () => {
       {/* Videos Grid */}
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-0 sm:gap-x-4 gap-y-6 sm:gap-y-8">
-          {[...Array(12)].map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="aspect-video bg-dark-800 rounded-none sm:rounded-xl mb-3 border-y sm:border border-dark-800"></div>
-              <div className="flex gap-3 px-3 sm:px-0">
-                <div className="w-9 h-9 bg-dark-800 rounded-full flex-shrink-0"></div>
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-dark-800 rounded w-3/4"></div>
-                  <div className="h-3 bg-dark-800 rounded w-1/2"></div>
-                </div>
-              </div>
-            </div>
+          {[...Array(8)].map((_, i) => (
+            <VideoCardSkeleton key={i} />
           ))}
         </div>
       ) : (
