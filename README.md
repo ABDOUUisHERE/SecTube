@@ -676,6 +676,7 @@ Recommended free models:
 - Persistent chat history
 - Markdown rendering in chat
 - Enhanced API documentation for AI agents
+- PWA
 
 ## Contributing
 
