@@ -2,56 +2,103 @@
 
 A modern video streaming platform designed specifically for cybersecurity enthusiasts, bug hunters, ethical hackers, and security researchers to share knowledge and learn together.
 
-## 🚀 Quick Start
+## Quick Start
 
 See [DEPLOYMENT.md](./DEPLOYMENT.md) for free deployment guide using Vercel, Render, and MongoDB Atlas.
 
 ## Features
 
-### For Viewers
-- Browse and search thousands of cybersecurity videos
-- Filter by category (Bug Bounty, Web Security, Penetration Testing, etc.)
-- Filter by difficulty level (Beginner to Expert)
-- Subscribe to your favorite security researchers
-- Personalized subscription feed with the latest content
-- Watch History to track your learning journey
-- Saved Videos for quick access to important tutorials
-- Like, comment, and engage with the community
-- Personalized recommendations
+### Video Browsing & Discovery
+- **Browse Videos**: Explore with advanced filters (category, difficulty, sort by latest/popular/oldest)
+- **Smart Search**: Responsive search bar (full on desktop, icon on mobile) with real-time results
+- **Video Player**: Adaptive quality streaming (360p, 480p, 720p, 1080p) with Video.js
+- **Channel Pages**: View creator profiles with stats, bio, specialties, and social links
+- **Featured Content**: Discover trending and recommended videos on homepage
+- **Pagination**: Smooth navigation across all video lists with optimized loading
 
-### For Streamers
-- Upload and manage video content
-- Automatic video processing and transcoding (multiple qualities)
-- Channel customization with bio and social links
-- Track views and engagement metrics
-- Organize content by categories and tags
-- Specify tools used and difficulty levels
+### User Engagement
+- **Subscribe/Unsubscribe**: Follow your favorite security researchers
+- **Subscription Feed**: Personalized feed with latest videos from subscribed channels
+- **Like/Dislike**: React to videos and see community engagement
+- **Save/Bookmark**: Bookmark videos for quick access later
+- **Watch History**: Automatic tracking of watched videos with timestamps
+- **Comments System**: Comment on videos with nested replies support
+- **Emoji Picker**: Add emojis to comments for expressive communication
+- **Video Sharing**: Share to Twitter, Facebook, LinkedIn, WhatsApp, Telegram, or copy link
 
-### Security & Platform Features
-- **Two-Factor Authentication (2FA)**: TOTP-based protection (Google Authenticator, Authy).
-- **Silent Signup Protocol**: Advanced protection against user enumeration during registration.
-- **Email Verification**: Mandatory verification flow for account activation.
-- **Secure Password Recovery**: Robust, rate-limited email-driven reset flow.
-- **Anti-Enumeration Login**: Standardized generic error responses for all auth failures.
-- User authentication with JWT
-- SSO Integration with **GitHub** and **Google**
-- Role-based access control (Viewer, Streamer, Admin)
-- Modern Cyber UI with animated backgrounds and high-tech aesthetic
-- Video on Demand (VOD) with adaptive quality
-- Automatic thumbnail generation
-- Real-time video processing with FFmpeg
-- Responsive design with dark mode
-- RESTful API architecture
+### Content Creation (Streamers)
+- **Video Upload**: Upload videos up to 5GB with drag-and-drop support
+- **Auto Transcoding**: Automatic processing to multiple qualities (360p-1080p)
+- **Thumbnail Management**: Auto-generated or custom thumbnail upload
+- **Channel Customization**: Set bio, specialties, and social links (GitHub, Twitter, LinkedIn, Website, HackerOne)
+- **Video Management**: Edit, delete, and organize your content
+- **Content Tagging**: Categorize with difficulty levels, tools used, and custom tags
+- **Subscriber Tracking**: Monitor your subscriber count and growth
+- **View Analytics**: Track views, likes, and engagement metrics
+- **Upgrade System**: Easy upgrade from viewer to streamer role
 
-### AI Assistant Features
+### Authentication & Security
+- **Email/Password Auth**: Secure authentication with bcrypt hashing (10 salt rounds)
+- **Email Verification**: Mandatory email verification for new accounts
+- **Two-Factor Authentication (2FA)**: TOTP-based protection (Google Authenticator, Authy compatible)
+- **Password Recovery**: Secure, rate-limited password reset via email
+- **SSO Integration**: Login with GitHub or Google OAuth
+- **Silent Signup Protocol**: Protection against user enumeration
+- **Anti-Enumeration Login**: Generic error messages for failed logins
+- **JWT Tokens**: Secure session management with 7-day expiration
+- **Role-Based Access**: Viewer, Streamer, and Admin roles with permissions
+- **Rate Limiting**: Brute-force protection on authentication endpoints
+- **XSS Prevention**: DOMPurify sanitization on all user inputs
+
+### User Settings & Profile
+- **Profile Management**: Update display name, username, email, avatar
+- **Password Change**: Update password with current password verification
+- **2FA Management**: Enable/disable 2FA with QR code setup
+- **Streamer Settings**: Manage channel name, bio, specialties, social links
+- **Account Upgrade**: Convert viewer account to streamer with channel setup
+- **Collapsible Sidebar**: Mobile-friendly settings navigation with sticky header
+
+### AI Assistant
 - **Intelligent Chatbot**: AI-powered assistant for platform navigation and video discovery
 - **MCP Integration**: Model Context Protocol for seamless API interaction
-- **Authenticated Actions**: AI can perform actions on behalf of logged-in users
-- **Natural Language Search**: Find videos using conversational queries
-- **Markdown Support**: Rich text formatting in chat responses
-- **Persistent Chat History**: Conversations saved across sessions
-- **Security-First Design**: Automatic sanitization of sensitive data
-- **Multi-Model Support**: Compatible with various LLMs via OpenRouter
+- **Tool Calling**: AI automatically calls appropriate API endpoints
+- **Authenticated Actions**: AI performs actions on behalf of logged-in users (like, save, subscribe)
+- **Natural Language Queries**: Find videos using conversational language
+- **Markdown Rendering**: Rich text formatting with code syntax highlighting
+- **Persistent Chat History**: Conversations saved in localStorage across sessions
+- **Security-First**: Automatic sanitization of sensitive data before AI processing
+- **Multi-Model Support**: Compatible with various LLMs via OpenRouter (Gemini, LLaMA, Claude)
+
+### Progressive Web App (PWA)
+- **Installable**: Install on mobile and desktop devices like a native app
+- **Offline Support**: Service worker with caching strategies for offline access
+- **App Icon**: Custom icon for home screen and app drawer
+- **Standalone Mode**: Full-screen experience without browser UI
+- **Auto-Update**: Seamless updates with service worker registration
+
+### User Experience & Design
+- **Dark Mode**: Eye-friendly dark theme throughout the application
+- **Responsive Design**: Mobile-first design that works on all screen sizes
+- **Touch-Friendly**: Optimized tap targets and gestures for mobile devices
+- **Shimmer Loading**: Professional gradient shimmer animations on all loading states
+- **Optimized Skeletons**: Smart skeleton counts (3-8 items) to prevent scrollbars
+- **Toast Notifications**: Non-blocking feedback for actions (3s auto-dismiss)
+- **Confirmation Dialogs**: Two-step confirmation for destructive actions
+- **Smooth Animations**: 60fps transitions and hover effects
+- **Keyboard Navigation**: Tab order and keyboard shortcuts support
+- **Error Handling**: User-friendly error messages with recovery suggestions
+
+### Additional Features
+- **Terms of Service**: Comprehensive terms page
+- **Privacy Policy**: Detailed privacy policy
+- **Admin Dashboard**: Admin panel for platform management
+- **Analytics Page**: Streamer analytics and insights (coming soon)
+- **RESTful API**: Clean API architecture with Swagger documentation
+- **Video Processing**: Real-time FFmpeg transcoding with status updates
+- **Automatic Thumbnails**: Generated at 10% timestamp (1280x720)
+- **Multiple Categories**: 14 cybersecurity categories (Bug Bounty, Web Security, Penetration Testing, etc.)
+- **Difficulty Levels**: Beginner, Intermediate, Advanced, Expert
+- **Tools Tagging**: Specify tools used (Burp Suite, Metasploit, etc.)
 
 ## Tech Stack
 
@@ -234,7 +281,7 @@ cd ../backend
 npm start
 ```
 
-## 🔑 SSO Configuration Guide
+## SSO Configuration Guide
 
 To enable GitHub and Google login, you must register OAuth applications on their respective platforms.
 
@@ -426,83 +473,114 @@ SecTube/
 ├── backend/
 │   ├── src/
 │   │   ├── config/
-│   │   │   ├── database.js              # MongoDB connection
+│   │   │   ├── database.js              # MongoDB connection setup
+│   │   │   ├── passport.js              # Passport.js SSO configuration
 │   │   │   ├── mcp.js                   # MCP configuration & Swagger tool generation
 │   │   │   ├── swagger.js               # Swagger/OpenAPI documentation
 │   │   │   ├── MCP_DOCUMENTATION.md     # Comprehensive MCP guide for AI agents
 │   │   │   └── MCP_QUICK_REFERENCE.md   # Quick MCP reference
 │   │   ├── controllers/
-│   │   │   ├── auth.js                  # Authentication logic
-│   │   │   ├── chat.js                  # AI chat controller
-│   │   │   ├── users.js                 # User management
-│   │   │   ├── videos.js                # Video operations
-│   │   │   └── channels.js              # Channel management
+│   │   │   ├── auth.js                  # Auth logic (login, register, 2FA, SSO)
+│   │   │   ├── chat.js                  # AI chat controller with MCP
+│   │   │   ├── users.js                 # User management & subscriptions
+│   │   │   ├── videos.js                # Video CRUD & processing
+│   │   │   └── channels.js              # Channel management & discovery
 │   │   ├── middleware/
-│   │   │   ├── auth.js                  # JWT authentication
-│   │   │   ├── errorHandler.js          # Error handling
-│   │   │   └── upload.js                # File upload handling
+│   │   │   ├── auth.js                  # JWT authentication & role checking
+│   │   │   ├── errorHandler.js          # Centralized error handling
+│   │   │   ├── upload.js                # Multer video upload (max 5GB)
+│   │   │   └── avatarUpload.js          # Multer avatar upload
 │   │   ├── models/
-│   │   │   ├── User.js                  # User schema
-│   │   │   ├── Video.js                 # Video schema
-│   │   │   └── Comment.js               # Comment schema
+│   │   │   ├── User.js                  # User schema with 2FA & roles
+│   │   │   ├── Video.js                 # Video schema with processing status
+│   │   │   └── Comment.js               # Comment schema with nested replies
 │   │   ├── routes/
-│   │   │   ├── auth.js                  # Auth routes
+│   │   │   ├── auth.js                  # Auth routes (includes GitHub/Google OAuth)
 │   │   │   ├── chat.js                  # AI chat routes
-│   │   │   ├── users.js                 # User routes
-│   │   │   ├── videos.js                # Video routes
-│   │   │   └── channels.js              # Channel routes
+│   │   │   ├── users.js                 # User routes (profile, history, saved)
+│   │   │   ├── videos.js                # Video routes (upload, search, comments)
+│   │   │   └── channels.js              # Channel routes (featured, by username)
 │   │   ├── services/
+│   │   │   ├── email.js                 # Email service (verification, password reset)
 │   │   │   └── ai/
 │   │   │       ├── index.js             # AI services hub
 │   │   │       ├── chat.service.js      # Chat service with OpenRouter
 │   │   │       ├── tools/
-│   │   │       │   └── toolExecutor.js  # MCP tool execution
+│   │   │       │   └── toolExecutor.js  # MCP tool execution engine
 │   │   │       ├── utils/
 │   │   │       │   └── sanitizer.js     # Data sanitization for AI
 │   │   │       └── README.md            # AI services documentation
 │   │   ├── utils/
-│   │   │   └── videoProcessor.js        # FFmpeg video processing
-│   │   └── server.js                    # Express app entry point
+│   │   │   └── videoProcessor.js        # FFmpeg video transcoding pipeline
+│   │   └── server.js                    # Express app entry point & middleware setup
 │   ├── uploads/                          # Temporary upload directory
-│   ├── videos/                           # Processed video files
-│   ├── thumbnails/                       # Video thumbnails
+│   ├── videos/                           # Processed video files (360p-1080p)
+│   ├── thumbnails/                       # Video thumbnails (auto-generated)
+│   ├── avatars/                          # User avatar images
 │   ├── .env.example                      # Environment variables template
-│   └── package.json
+│   └── package.json                      # Backend dependencies
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Navbar.jsx           # Navigation bar
-│   │   │   ├── Chatbot.jsx          # AI chatbot component
-│   │   │   ├── VideoCard.jsx        # Video thumbnail card
-│   │   │   ├── VideoPlayer.jsx      # Video.js player
-│   │   │   ├── ConfirmDialog.jsx    # Confirmation dialogs
-│   │   │   └── ProtectedRoute.jsx   # Route guard
+│   │   │   ├── Navbar.jsx               # Navigation bar with responsive search
+│   │   │   ├── Chatbot.jsx              # AI chatbot component
+│   │   │   ├── VideoCard.jsx            # Video thumbnail card
+│   │   │   ├── VideoCardSkeleton.jsx    # Video card loading skeleton with shimmer
+│   │   │   ├── VideoPlayer.jsx          # Video.js player with quality selection
+│   │   │   ├── LoadingSpinner.jsx       # Reusable loading spinner (full-screen/inline)
+│   │   │   ├── CommentItem.jsx          # Comment component with replies
+│   │   │   ├── EmojiPicker.jsx          # Emoji picker for comments
+│   │   │   ├── CustomSelect.jsx         # Custom dropdown select component
+│   │   │   ├── Button.jsx               # Reusable button component
+│   │   │   ├── Input.jsx                # Reusable input component
+│   │   │   ├── Textarea.jsx             # Reusable textarea component
+│   │   │   ├── ConfirmDialog.jsx        # Confirmation dialogs
+│   │   │   └── ProtectedRoute.jsx       # Route guard for auth
 │   │   ├── pages/
-│   │   │   ├── Home.jsx             # Home page
-│   │   │   ├── Browse.jsx           # Browse videos
-│   │   │   ├── Search.jsx           # Search page
-│   │   │   ├── Video.jsx            # Video player page
-│   │   │   ├── Channel.jsx          # Channel page
-│   │   │   ├── Upload.jsx           # Video upload
-│   │   │   ├── Profile.jsx          # User profile
-│   │   │   ├── Login.jsx            # Login page
-│   │   │   └── Register.jsx         # Registration
+│   │   │   ├── Home.jsx                 # Home page with featured videos
+│   │   │   ├── Browse.jsx               # Browse with filters and pagination
+│   │   │   ├── Search.jsx               # Search results page
+│   │   │   ├── Video.jsx                # Video player page with comments
+│   │   │   ├── Channel.jsx              # Channel profile page
+│   │   │   ├── Upload.jsx               # Video upload page (streamers)
+│   │   │   ├── Settings.jsx             # User settings with collapsible nav
+│   │   │   ├── History.jsx              # Watch history page
+│   │   │   ├── Saved.jsx                # Saved/bookmarked videos
+│   │   │   ├── Subscriptions.jsx        # Subscription feed
+│   │   │   ├── Login.jsx                # Login with 2FA support
+│   │   │   ├── Register.jsx             # Registration page
+│   │   │   ├── ForgotPassword.jsx       # Password recovery
+│   │   │   ├── VerifyEmail.jsx          # Email verification
+│   │   │   ├── Terms.jsx                # Terms of service
+│   │   │   ├── Privacy.jsx              # Privacy policy
+│   │   │   ├── Admin.jsx                # Admin dashboard
+│   │   │   └── Analytics.jsx            # Analytics page (streamers)
 │   │   ├── services/
-│   │   │   └── api.js               # API client
+│   │   │   └── api.js                   # Axios API client with interceptors
 │   │   ├── store/
-│   │   │   ├── authStore.js         # Auth state management
-│   │   │   ├── toastStore.js        # Toast notifications
-│   │   │   └── sidebarStore.js      # Sidebar state
-│   │   ├── App.jsx                   # Main app component
-│   │   ├── main.jsx                  # React entry point
-│   │   └── index.css                 # Global styles
-│   ├── index.html
-│   ├── vite.config.js
-│   ├── tailwind.config.js
-│   └── package.json
-├── .gitignore
-├── package.json
-└── README.md
+│   │   │   ├── authStore.js             # Auth state (Zustand + localStorage)
+│   │   │   ├── toastStore.js            # Toast notifications
+│   │   │   └── sidebarStore.js          # Sidebar state
+│   │   ├── hooks/
+│   │   │   └── useDropdownPosition.js   # Dropdown positioning hook
+│   │   ├── utils/
+│   │   │   └── sanitize.js              # XSS prevention utility
+│   │   ├── config/
+│   │   │   └── constants.js             # App constants and API URLs
+│   │   ├── App.jsx                      # Main app component with routing
+│   │   ├── main.jsx                     # React entry point
+│   │   └── index.css                    # Global styles + shimmer animation
+│   ├── public/
+│   │   └── logo.png                     # App logo for PWA
+│   ├── index.html                       # HTML with PWA meta tags & initial loader
+│   ├── vite.config.js                   # Vite config with PWA plugin
+│   ├── tailwind.config.js               # TailwindCSS configuration
+│   └── package.json                     # Dependencies (includes vite-plugin-pwa)
+├── .gitignore                           # Git ignore rules
+├── package.json                         # Root workspace configuration
+├── README.md                            # This file - project documentation
+├── CLAUDE.md                            # Claude Code AI assistant instructions
+└── DEPLOYMENT.md                        # Deployment guide (Vercel, Render, MongoDB Atlas)
 ```
 
 ## Categories
@@ -578,7 +656,7 @@ If video processing fails with FFmpeg errors:
 - Increase `MAX_FILE_SIZE` in backend .env
 - Check available disk space in `backend/uploads/` and `backend/videos/`
 
-## 🌐 Deployment
+## Deployment
 
 For detailed deployment instructions for free hosting, see **[DEPLOYMENT.md](./DEPLOYMENT.md)**
 
@@ -592,7 +670,7 @@ For detailed deployment instructions for free hosting, see **[DEPLOYMENT.md](./D
 
 See the full deployment guide for step-by-step instructions.
 
-## 🤖 AI Assistant & MCP Integration
+## AI Assistant & MCP Integration
 
 SecTube features an intelligent AI chatbot powered by MCP (Model Context Protocol) that can help users navigate the platform, discover videos, and perform actions naturally.
 
@@ -643,40 +721,48 @@ Recommended free models:
 
 ## Future Enhancements
 
+### Next Up (High Priority)
+- **Dark/Light Theme Toggle**: User preference for theme selection
+- **Video Playlists**: Create and manage custom video collections
+- **Advanced Notifications**: Real-time notifications for subscriptions and interactions
+- **Enhanced Analytics**: Streamer dashboard with detailed insights and charts
+- **Video Chapters**: Timestamped sections for easier navigation
+- **Keyboard Shortcuts**: Power-user features for faster navigation
+- **Enhanced PWA Icons**: Custom icon set from PWABuilder integration
+- **Comment Reactions**: Emoji reactions on comments and replies
+- **Profile Customization**: Banner images, custom themes for channels
+
 ### Planned Features
-- Live streaming support (RTMP/WebRTC)
-- Real-time chat during live streams
-- Playlists and collections
-- Advanced analytics dashboard
-- Enhanced AI features:
-  - Video content analysis and tagging
-  - Smart recommendations based on viewing history
-  - Automated moderation
-- Multi-language support
-- Mobile apps (React Native)
-- CDN integration for global delivery
-- User achievements and badges
-- Private messaging between users
+- **Live Streaming**: RTMP/WebRTC support for real-time broadcasts
+- **Live Chat**: Real-time chat during live streams
+- **Smart Recommendations**: AI-powered video suggestions based on viewing history
+- **Video Content Analysis**: Automatic tagging and categorization using AI
+- **Multi-language Support**: i18n for global accessibility
+- **Mobile Apps**: React Native apps for iOS and Android
+- **CDN Integration**: Global delivery with Cloudflare or AWS CloudFront
+- **Achievements System**: Badges and rewards for user engagement
+- **Private Messaging**: Direct messaging between users
+- **Collaborative Playlists**: Shared playlists with friends
 
 ### Infrastructure Improvements
-- Redis caching for better performance
-- Elasticsearch for advanced search
-- AWS S3/Cloudflare for video storage
-- WebSocket for real-time features
-- Docker containerization
-- CI/CD pipeline
-- Automated testing (Jest, Cypress)
+- **Redis Caching**: Improve performance with in-memory caching
+- **Elasticsearch**: Advanced full-text search capabilities
+- **Cloud Storage**: AWS S3 or Cloudflare R2 for scalable video storage
+- **WebSocket**: Real-time features (live chat, notifications)
+- **Docker**: Containerization for easier deployment
+- **CI/CD Pipeline**: Automated testing and deployment
+- **Automated Testing**: Jest (unit), Cypress (e2e), Playwright (integration)
+- **Monitoring**: Sentry for error tracking, Analytics for user insights
 
-### Recently Completed ✅
-- AI Chatbot with MCP integration
-- Swagger/OpenAPI documentation
-- Modular AI services architecture
-- Authenticated AI actions with JWT
-- Data sanitization for AI responses
-- Persistent chat history
-- Markdown rendering in chat
-- Enhanced API documentation for AI agents
-- PWA
+### Recently Completed
+- **Progressive Web App (PWA)**: Installable on mobile/desktop with offline support
+- **Unified Loading UI**: Shimmer animations and optimized skeleton loaders
+- **Mobile Responsiveness**: Touch-friendly interfaces across all pages
+- **AI Chatbot**: MCP integration with OpenRouter
+- **Swagger/OpenAPI**: Comprehensive API documentation
+- **Authenticated AI Actions**: JWT-based user actions via AI
+- **Persistent Chat History**: Cross-session storage
+- **Enhanced Mobile UX**: Collapsible navigation, responsive search, optimized buttons
 
 ## Contributing
 
@@ -717,4 +803,4 @@ For issues, questions, or contributions:
 
 ---
 
-**Happy Learning and Stay Secure!** 🔐
+**Happy Learning and Stay Secure!**
