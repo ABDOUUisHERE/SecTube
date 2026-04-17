@@ -1,5 +1,5 @@
+import './config/env.js'; // Must be first — loads dotenv before any other import reads process.env
 import express from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -8,6 +8,8 @@ import mongoSanitize from 'express-mongo-sanitize';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import connectDB from './config/database.js';
+import './config/redis.js';
+import { flushViewBuffer } from './utils/viewBuffer.js';
 import errorHandler from './middleware/errorHandler.js';
 import passport from './config/passport.js';
 import { setupSwagger } from './config/swagger.js';
@@ -22,9 +24,6 @@ import channelRoutes from './routes/channels.js';
 import chatRoutes from './routes/chat.js';
 import analyticsRoutes from './routes/analytics.js';
 import adminRoutes from './routes/admin.js';
-
-// Load environment variables
-dotenv.config();
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -155,6 +154,9 @@ app.use(errorHandler);
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
+
+// Flush buffered view counts to MongoDB every 30 seconds
+setInterval(flushViewBuffer, 30_000);
 
 // Start server
 const PORT = process.env.PORT || 5000;

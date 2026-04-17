@@ -60,6 +60,8 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for free deployment guide using Vercel, Ren
 
 ### AI Assistant
 - **Intelligent Chatbot**: AI-powered assistant for platform navigation and video discovery
+- **Platform Navigation**: AI navigates the user to any page ("take me to settings", "go to browse") with automatic redirect and chat close
+- **UI-First Responses**: How-to questions answered with step-by-step UI instructions, not raw API docs
 - **MCP Integration**: Model Context Protocol for seamless API interaction
 - **Tool Calling**: AI automatically calls appropriate API endpoints
 - **Authenticated Actions**: AI performs actions on behalf of logged-in users (like, save, subscribe)
@@ -105,6 +107,7 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for free deployment guide using Vercel, Ren
 ### Backend
 - **Node.js** with Express.js
 - **MongoDB** with Mongoose ODM
+- **Redis** (ioredis) for response caching and view buffering
 - **JWT** for authentication
 - **Passport.js** for GitHub/Google SSO
 - **FFmpeg** for video processing
@@ -229,6 +232,11 @@ VIDEO_QUALITIES=360p,480p,720p,1080p
 # AI & MCP Configuration (Optional - for AI chatbot)
 OPENROUTER_API_KEY=your_openrouter_api_key
 CHAT_MODEL=google/gemini-flash-1.5:free
+
+# Redis (Optional - for caching and view buffering)
+# Local:   redis://localhost:6379
+# Upstash: rediss://:password@host.upstash.io:6379  (free tier at upstash.com)
+REDIS_URL=redis://localhost:6379
 ```
 
 **Note:** To get an OpenRouter API key for the AI chatbot:
@@ -474,6 +482,8 @@ SecTube/
 │   ├── src/
 │   │   ├── config/
 │   │   │   ├── database.js              # MongoDB connection setup
+│   │   │   ├── env.js                   # Dotenv loader (must import first in server.js)
+│   │   │   ├── redis.js                 # ioredis client with graceful degradation
 │   │   │   ├── passport.js              # Passport.js SSO configuration
 │   │   │   ├── mcp.js                   # MCP configuration & Swagger tool generation
 │   │   │   ├── swagger.js               # Swagger/OpenAPI documentation
@@ -483,10 +493,11 @@ SecTube/
 │   │   │   ├── auth.js                  # Auth logic (login, register, 2FA, SSO)
 │   │   │   ├── chat.js                  # AI chat controller with MCP
 │   │   │   ├── users.js                 # User management & subscriptions
-│   │   │   ├── videos.js                # Video CRUD & processing
+│   │   │   ├── videos.js                # Video CRUD, caching & view buffering
 │   │   │   └── channels.js              # Channel management & discovery
 │   │   ├── middleware/
 │   │   │   ├── auth.js                  # JWT authentication & role checking
+│   │   │   ├── cache.js                 # Redis response cache middleware
 │   │   │   ├── errorHandler.js          # Centralized error handling
 │   │   │   ├── upload.js                # Multer video upload (max 5GB)
 │   │   │   └── avatarUpload.js          # Multer avatar upload
@@ -511,7 +522,8 @@ SecTube/
 │   │   │       │   └── sanitizer.js     # Data sanitization for AI
 │   │   │       └── README.md            # AI services documentation
 │   │   ├── utils/
-│   │   │   └── videoProcessor.js        # FFmpeg video transcoding pipeline
+│   │   │   ├── videoProcessor.js        # FFmpeg video transcoding pipeline
+│   │   │   └── viewBuffer.js            # Redis view dedup & buffered flush to MongoDB
 │   │   └── server.js                    # Express app entry point & middleware setup
 │   ├── uploads/                          # Temporary upload directory
 │   ├── videos/                           # Processed video files (360p-1080p)
@@ -634,6 +646,16 @@ Restart the backend after changing the model.
 - The `OPENROUTER_API_KEY` environment variable is missing or invalid
 - Add your API key from [openrouter.ai/keys](https://openrouter.ai/keys) to `backend/.env`
 
+### Redis Issues
+
+#### "REDIS_URL not set — caching and view buffering disabled"
+Redis is optional. The app works without it. To enable:
+1. **Local**: Install Redis and set `REDIS_URL=redis://localhost:6379` in `backend/.env`
+2. **Cloud (free)**: Create a free database at [upstash.com](https://upstash.com) and use the `rediss://` connection string
+
+#### Redis connected but caching not working
+Ensure `REDIS_URL` is set **before** the server starts. The `.env` file must be loaded before any other module reads `process.env`. The `config/env.js` import at the top of `server.js` handles this — do not move it.
+
 ### Common Issues
 
 #### FFmpeg Not Found
@@ -677,7 +699,9 @@ SecTube features an intelligent AI chatbot powered by MCP (Model Context Protoco
 ### Features
 
 - **Natural Language Interaction**: Ask questions in plain English
-- **API Tool Calling**: AI automatically uses the right API endpoints via MCP
+- **Platform Navigation**: Say "take me to settings" or "go to browse" — AI calls the `navigate_to` tool and the app redirects automatically
+- **UI-First How-To Answers**: Questions like "how do I upload a video?" get step-by-step UI instructions, not API documentation
+- **API Tool Calling**: AI automatically uses the right API endpoints via MCP for data actions
 - **Authenticated Actions**: Inherits user permissions to like videos, subscribe to channels, update profile, etc.
 - **Markdown Rendering**: Rich text responses with code syntax highlighting
 - **Persistent History**: Chat conversations saved in localStorage across sessions
@@ -687,13 +711,16 @@ SecTube features an intelligent AI chatbot powered by MCP (Model Context Protoco
 ### How It Works
 
 1. **Swagger → MCP Tools**: API endpoints are automatically converted to MCP tools
-2. **AI Model Selection**: Configure any OpenRouter-compatible model
-3. **Tool Execution**: AI calls tools with user's JWT token for authenticated actions
-4. **Data Sanitization**: Sensitive fields filtered before sending to AI
-5. **Response Rendering**: Markdown-formatted responses displayed in chat UI
+2. **`navigate_to` Tool**: A special client-side tool (no API call) that signals the frontend to redirect to a platform page
+3. **AI Model Selection**: Configure any OpenRouter-compatible model
+4. **Tool Execution**: AI calls tools with user's JWT token for authenticated actions
+5. **Data Sanitization**: Sensitive fields filtered before sending to AI
+6. **Response Rendering**: Markdown-formatted responses displayed in chat UI
 
 ### Example Queries
 
+- "Take me to my settings"
+- "Go to the browse page"
 - "Find me videos about SQL injection for beginners"
 - "Subscribe to the top bug bounty channels"
 - "What videos have I watched recently?"
@@ -745,7 +772,6 @@ Recommended free models:
 - **Collaborative Playlists**: Shared playlists with friends
 
 ### Infrastructure Improvements
-- **Redis Caching**: Improve performance with in-memory caching
 - **Elasticsearch**: Advanced full-text search capabilities
 - **Cloud Storage**: AWS S3 or Cloudflare R2 for scalable video storage
 - **WebSocket**: Real-time features (live chat, notifications)
@@ -755,6 +781,9 @@ Recommended free models:
 - **Monitoring**: Sentry for error tracking, Analytics for user insights
 
 ### Recently Completed
+- **Redis Caching**: Video list responses cached (30s TTL), view dedup via Redis SET NX, buffered view writes flushed every 30s — graceful degradation if Redis is unavailable
+- **AI Platform Navigation**: `navigate_to` MCP tool lets the AI redirect users to any page on the platform
+- **AI UI-First Responses**: Chatbot answers how-to questions with UI steps, not API documentation
 - **Progressive Web App (PWA)**: Installable on mobile/desktop with offline support
 - **Unified Loading UI**: Shimmer animations and optimized skeleton loaders
 - **Mobile Responsiveness**: Touch-friendly interfaces across all pages

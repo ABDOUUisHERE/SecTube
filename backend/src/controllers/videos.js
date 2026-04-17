@@ -8,6 +8,8 @@ import { processVideo } from '../utils/videoProcessor.js';
 import { uploadImageToCloudinary, uploadVideoToCloudinary, getCloudinaryVideoUrl } from '../utils/cloudinaryUpload.js';
 import { isCloudinaryConfigured } from '../config/cloudinary.js';
 import { deleteVideoFiles } from '../utils/fileCleanup.js';
+import { invalidateCache } from '../middleware/cache.js';
+import { isDuplicateView, bufferView } from '../utils/viewBuffer.js';
 import path from 'path';
 import fs from 'fs';
 
@@ -126,6 +128,9 @@ export const uploadVideo = async (req, res, next) => {
     processVideo(video._id, videoFile.path, useCloudinary)
       .catch(err => console.error('Video processing error:', err));
 
+    // Bust the video list cache so the new upload appears
+    invalidateCache('cache:/api/videos*').catch(() => {});
+
     res.status(201).json({
       success: true,
       message: 'Video uploaded successfully and is being processed',
@@ -215,28 +220,25 @@ export const getVideo = async (req, res, next) => {
 
     // Increment view count (only if not the uploader)
     if (!req.user || req.user.id !== video.uploader._id.toString()) {
-      // Check for recent view from this user/IP to prevent spam (1 minute cooldown)
-      const lastView = await View.findOne({
-        video: video._id,
-        $or: [
-          ...(req.user ? [{ viewer: req.user.id }] : []),
-          { viewerIp: req.ip }
-        ],
-        watchedAt: { $gt: new Date(Date.now() - 60 * 1000) }
-      });
+      const duplicate = await isDuplicateView(video._id, req.user?.id, req.ip);
 
-      if (!lastView) {
-        video.views += 1;
-        await video.save();
+      if (!duplicate) {
+        // Buffer the increment in Redis (flush to MongoDB every 30s).
+        // Falls back to a direct DB write when Redis is unavailable.
+        const buffered = await bufferView(video._id);
+        if (!buffered) {
+          video.views += 1;
+          await video.save();
+        }
 
-        // Create View record for time-series analytics
-        await View.create({
+        // Always persist the time-series View record for analytics
+        View.create({
           video: video._id,
           viewer: req.user ? req.user.id : null,
           viewerIp: req.ip,
           viewerUserAgent: req.headers['user-agent'],
           watchedAt: new Date()
-        });
+        }).catch(() => {});
       }
     }
 
@@ -340,6 +342,9 @@ export const updateVideo = async (req, res, next) => {
       }
     );
 
+    invalidateCache(`cache:/api/videos/${req.params.videoId}`).catch(() => {});
+    invalidateCache('cache:/api/videos*').catch(() => {});
+
     res.status(200).json({
       success: true,
       data: video
@@ -373,6 +378,9 @@ export const deleteVideo = async (req, res, next) => {
     await deleteVideoFiles(video);
 
     await video.deleteOne();
+
+    invalidateCache(`cache:/api/videos/${req.params.videoId}`).catch(() => {});
+    invalidateCache('cache:/api/videos*').catch(() => {});
 
     res.status(200).json({
       success: true,
@@ -432,6 +440,8 @@ export const likeVideo = async (req, res, next) => {
       });
     }
 
+    invalidateCache(`cache:/api/videos/${req.params.videoId}`).catch(() => {});
+
     res.status(200).json({
       success: true,
       data: {
@@ -474,6 +484,8 @@ export const dislikeVideo = async (req, res, next) => {
     }
 
     await video.save();
+
+    invalidateCache(`cache:/api/videos/${req.params.videoId}`).catch(() => {});
 
     res.status(200).json({
       success: true,

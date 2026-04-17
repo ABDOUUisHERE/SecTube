@@ -16,6 +16,7 @@ import {
 } from '../controllers/videos.js';
 import { protect, authorize, optionalAuth } from '../middleware/auth.js';
 import { uploadMiddleware } from '../middleware/upload.js';
+import { cacheMiddleware } from '../middleware/cache.js';
 
 const router = express.Router();
 
@@ -72,7 +73,7 @@ const videoMetadataValidation = [
  *       200:
  *         description: List of videos
  */
-router.get('/', getVideos);
+router.get('/', cacheMiddleware(30), getVideos);
 
 /**
  * @swagger
