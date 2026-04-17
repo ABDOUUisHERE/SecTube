@@ -44,7 +44,7 @@ const Home = () => {
           >
             {/* Background scanning effect for active button */}
             {category === selectedCategory && (
-              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[btn-scan_2s_infinite]"></div>
             )}
             
             <span className="relative z-10 flex items-center gap-2">
@@ -57,8 +57,8 @@ const Home = () => {
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes shimmer {
+      <style>{`
+        @keyframes btn-scan {
           100% { transform: translateX(100%); }
         }
       `}</style>
