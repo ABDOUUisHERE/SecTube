@@ -4,6 +4,7 @@ import Comment from '../models/Comment.js';
 import mongoose from 'mongoose';
 import { isCloudinaryConfigured } from '../config/cloudinary.js';
 import { deleteUserAvatar, deleteVideoFiles } from '../utils/fileCleanup.js';
+import redis from '../config/redis.js';
 
 // @desc    Get all users
 // @route   GET /api/admin/users
@@ -214,6 +215,26 @@ export const getStats = async (req, res, next) => {
     const streamersCount = await User.countDocuments({ isStreamer: true });
     const blockedUsersCount = await User.countDocuments({ isBlocked: true });
 
+    // Redis health + stats
+    let redisInfo = { status: 'disabled', cacheKeys: 0, bufferedViews: 0 };
+    if (redis) {
+      try {
+        await redis.ping();
+        const [cacheKeys, viewKeys] = await Promise.all([
+          redis.keys('cache:*'),
+          redis.keys('views:buffer:*')
+        ]);
+        let bufferedViews = 0;
+        if (viewKeys.length > 0) {
+          const vals = await redis.mget(...viewKeys);
+          bufferedViews = vals.reduce((sum, v) => sum + (parseInt(v) || 0), 0);
+        }
+        redisInfo = { status: 'connected', cacheKeys: cacheKeys.length, bufferedViews };
+      } catch {
+        redisInfo = { status: 'error', cacheKeys: 0, bufferedViews: 0 };
+      }
+    }
+
     // System Health Checks
     const systemHealth = {
       database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
@@ -222,7 +243,8 @@ export const getStats = async (req, res, next) => {
       mailServer: process.env.SMTP_HOST ? 'configured' : 'not_configured',
       environment: process.env.NODE_ENV || 'development',
       swagger: process.env.NODE_ENV !== 'production' ? 'active' : 'restricted',
-      mcp: 'operational' // If this code is running, the server is handling requests
+      mcp: 'operational',
+      redis: redisInfo
     };
 
     res.status(200).json({

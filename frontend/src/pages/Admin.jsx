@@ -179,6 +179,29 @@ const AdminOverview = ({ stats, loading }) => {
               </p>
             </div>
 
+            {/* Redis Cache */}
+            <div className="p-4 bg-dark-800/30 rounded-lg border border-dark-800">
+              <div className={`flex items-center gap-2 text-xs font-bold mb-2 ${
+                health.redis?.status === 'connected' ? 'text-cyan-400'
+                : health.redis?.status === 'error'   ? 'text-red-500'
+                : 'text-gray-500'
+              }`}>
+                <div className={`w-2 h-2 rounded-full ${
+                  health.redis?.status === 'connected' ? 'bg-cyan-400 animate-pulse'
+                  : health.redis?.status === 'error'   ? 'bg-red-500'
+                  : 'bg-gray-600'
+                }`}></div>
+                Redis Cache
+              </div>
+              <p className="text-[11px] text-gray-400">
+                {health.redis?.status === 'connected'
+                  ? `${health.redis.cacheKeys} cached · ${health.redis.bufferedViews} views buffered`
+                  : health.redis?.status === 'error'
+                  ? 'Connection Error'
+                  : 'Disabled (REDIS_URL not set)'}
+              </p>
+            </div>
+
             {/* MCP Status */}
             <div className="p-4 bg-dark-800/30 rounded-lg border border-dark-800">
               <div className="flex items-center gap-2 text-green-500 text-xs font-bold mb-2">
