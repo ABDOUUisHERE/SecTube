@@ -75,6 +75,37 @@ if (specs && specs.paths) {
   });
 }
 
+// Add client-side navigation tool
+tools.push({
+  name: 'navigate_to',
+  description: 'Navigate the user to a specific page on SecTube. Use this when the user asks to go somewhere, or after an action that should take them to a new page.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      path: {
+        type: 'string',
+        description: `The exact page path to navigate to. Only use paths from this list:
+/ — Home feed
+/browse — Browse all videos with filters
+/search?q=TERM — Search results (replace TERM with the query)
+/settings — User settings and profile (requires login)
+/history — Watch history (requires login)
+/saved — Saved videos (requires login)
+/subscriptions — Subscriptions feed (requires login)
+/analytics — Channel analytics (requires streamer role)
+/admin — Admin dashboard (requires admin role)
+/channel/USERNAME — A user's channel page (replace USERNAME)
+/video/ID — A specific video page (replace ID)
+/login — Login page
+/register — Register page
+Do NOT invent paths that are not in this list.`
+      }
+    },
+    required: ['path']
+  },
+  _metadata: { clientAction: 'navigate' }
+});
+
 // Handler to list available tools
 mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
   return {

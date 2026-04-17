@@ -113,11 +113,11 @@ const Navbar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search videos..."
-                className="flex-1 bg-dark-950 border border-dark-700 hover:border-dark-600 rounded-l-md px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
+                className="flex-1 bg-dark-950 border border-dark-700 hover:border-dark-600 rounded-l-md px-4 h-[34px] text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors"
               />
               <button
                 type="submit"
-                className="bg-dark-800 hover:bg-dark-700 border border-l-0 border-dark-700 hover:border-dark-600 rounded-r-md px-4 transition-colors"
+                className="bg-dark-800 hover:bg-dark-700 border border-l-0 border-dark-700 hover:border-dark-600 rounded-r-md px-4 h-[34px] transition-colors"
               >
                 <FaSearch className="text-gray-400" size={16} />
               </button>

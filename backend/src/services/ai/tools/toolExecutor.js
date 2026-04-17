@@ -14,7 +14,18 @@ export const toolExecutor = {
     const tool = availableTools.find(t => t.name === toolCall.function.name);
     if (!tool) return `Tool ${toolCall.function.name} not found`;
 
-    const { path, method } = tool._metadata;
+    const { path, method, clientAction } = tool._metadata;
+
+    // Handle client-side actions — no API call needed
+    if (clientAction) {
+      let args = {};
+      try {
+        args = typeof toolCall.function.arguments === 'string'
+          ? JSON.parse(toolCall.function.arguments)
+          : toolCall.function.arguments || {};
+      } catch (_) {}
+      return JSON.stringify({ __clientAction: clientAction, ...args });
+    }
 
     // Parse arguments safely
     let args = {};

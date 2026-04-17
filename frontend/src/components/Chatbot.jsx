@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FaMagic, FaRobot, FaTimes, FaPaperPlane, FaSpinner, FaTrash, FaUser, FaInfoCircle } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -16,6 +16,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 const Chatbot = () => {
   const { isOpen, toggleChatbot, closeChatbot, messages, addMessage, setMessages, clearMessages } = useChatbotStore();
   const location = useLocation();
+  const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -53,8 +54,14 @@ const Chatbot = () => {
         }
       );
 
-      const assistantMessage = response.data.message;
+      const { message: assistantMessage, redirect } = response.data;
       addMessage(assistantMessage);
+      if (redirect) {
+        setTimeout(() => {
+          closeChatbot();
+          navigate(redirect);
+        }, 800);
+      }
     } catch (error) {
       console.error('Chat error:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to get AI response. Please try again.';
