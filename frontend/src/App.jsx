@@ -27,11 +27,17 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { FaTimes } from 'react-icons/fa';
 import useAuthStore from './store/authStore';
 import useSidebarStore from './store/sidebarStore';
+import useThemeStore from './store/themeStore';
 
 function App() {
   const { isOpen } = useSidebarStore();
   const { isAuthenticated } = useAuthStore();
+  const { theme } = useThemeStore();
   const location = useLocation();
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
   const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'].some(path => location.pathname.startsWith(path));
   
   // Dev banner states: 'entering' | 'visible' | 'leaving' | 'hidden'

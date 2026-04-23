@@ -286,7 +286,7 @@ npm run build
 
 # Start backend (serves both API and frontend)
 cd ../backend
-npm start
+npm start 
 ```
 
 ## SSO Configuration Guide

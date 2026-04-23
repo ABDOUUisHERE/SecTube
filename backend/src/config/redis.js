@@ -7,6 +7,7 @@ if (process.env.REDIS_URL) {
     maxRetriesPerRequest: 1,
     enableReadyCheck: false,
     lazyConnect: true,
+    commandTimeout: 2000,
   });
 
   redis.on('connect', () => console.log('✅ Redis connected'));

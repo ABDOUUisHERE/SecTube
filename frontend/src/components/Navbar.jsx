@@ -1,11 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaUpload, FaUser, FaSignOutAlt, FaBars, FaCog, FaVideo, FaGavel } from 'react-icons/fa';
-import { BsStars } from 'react-icons/bs';
+import { BsStars, BsMoonFill, BsSunFill } from 'react-icons/bs';
 import { useState, useRef, useEffect } from 'react';
 import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
 import useSidebarStore from '../store/sidebarStore';
 import useChatbotStore from '../store/chatbotStore';
+import useThemeStore from '../store/themeStore';
 import ConfirmDialog from './ConfirmDialog';
 import Z_INDEX from '../config/zIndex';
 import { getAvatarUrl } from '../config/constants';
@@ -15,6 +16,7 @@ const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuthStore();
   const { toggleSidebar } = useSidebarStore();
   const { toggleChatbot } = useChatbotStore();
+  const { theme, toggleTheme } = useThemeStore();
   const navigate = useNavigate();
   const { addToast } = useToastStore();
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,7 +89,12 @@ const Navbar = () => {
             <FaBars size={16} className="sm:w-[18px] sm:h-[18px]" />
           </button>
           <Link to="/" className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 group">
-            <img src="/logo.png" alt="SecTube Logo" className="h-8 sm:h-10 w-auto" />
+            <img
+              src="/logo.png"
+              alt="SecTube Logo"
+              className="h-8 sm:h-10 w-auto transition-[filter] duration-300"
+              style={theme === 'light' ? { filter: 'brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(185deg) brightness(0.25)' } : undefined}
+            />
             <span className="hidden sm:inline-block bg-primary-600/10 text-primary-500 border border-primary-500/20 px-1.5 py-0.5 rounded text-[10px] font-black tracking-widest uppercase">
               Beta
             </span>
@@ -143,6 +150,27 @@ const Navbar = () => {
             title="Ask AI"
           >
             <BsStars size={18} />
+          </button>
+
+          {/* Theme Toggle */}
+          <button
+            type="button"
+            role="switch"
+            onClick={toggleTheme}
+            aria-checked={theme === 'light'}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+              theme === 'light' ? 'bg-amber-400' : 'bg-dark-700'
+            }`}
+          >
+            <span className={`flex items-center justify-center h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ${
+              theme === 'light' ? 'translate-x-5' : 'translate-x-0.5'
+            }`}>
+              {theme === 'dark'
+                ? <BsMoonFill size={9} className="text-indigo-500" />
+                : <BsSunFill size={9} className="text-amber-500" />
+              }
+            </span>
           </button>
 
           {isAuthenticated ? (

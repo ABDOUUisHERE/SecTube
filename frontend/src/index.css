@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Dark theme palette (default) ───────────────────────────── */
+:root {
+  --dark-50:  249 250 251;
+  --dark-100: 243 244 246;
+  --dark-200: 229 231 235;
+  --dark-300: 209 213 219;
+  --dark-400: 156 163 175;
+  --dark-500: 107 114 128;
+  --dark-600:  75  85  99;
+  --dark-700:  55  65  81;
+  --dark-800:  31  41  55;
+  --dark-900:  17  24  39;
+  --dark-950:  10  10  10;
+}
+
+/* ── Light theme palette ─────────────────────────────────────── */
+[data-theme="light"] {
+  --dark-50:    2   6  23;   /* near-black */
+  --dark-100:  15  23  42;
+  --dark-200:  30  41  59;
+  --dark-300:  51  65  85;
+  --dark-400:  71  85 105;
+  --dark-500: 100 116 139;
+  --dark-600: 148 163 184;
+  --dark-700: 203 213 225;  /* visible borders */
+  --dark-800: 226 232 240;  /* hover states / elevated surfaces */
+  --dark-900: 248 250 252;  /* card / nav background */
+  --dark-950: 255 255 255;  /* main background */
+}
+
 :root {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -11,7 +41,7 @@
 
   color-scheme: dark;
   color: #ffffff;
-  background-color: #0a0a0a;
+  background-color: rgb(var(--dark-950));
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -19,10 +49,48 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+[data-theme="light"] {
+  color-scheme: light;
+  color: #111827;
+  background-color: #ffffff;
+}
+
+/* Light mode text overrides */
+[data-theme="light"] .text-white    { color: #111827; }
+[data-theme="light"] .text-gray-100 { color: #111827; }
+[data-theme="light"] .text-gray-200 { color: #1f2937; }
+[data-theme="light"] .text-gray-300 { color: #374151; }
+[data-theme="light"] .text-gray-400 { color: #374151; }
+[data-theme="light"] .text-gray-500 { color: #4b5563; }
+[data-theme="light"] .text-gray-600 { color: #6b7280; }
+
+/* Preserve white text on bg-black (video duration badges, overlays) */
+[data-theme="light"] .bg-black.text-white  { color: #ffffff; }
+[data-theme="light"] .bg-black .text-white { color: #ffffff; }
+
+/* Preserve white text on explicitly colored (non-theme) backgrounds */
+[data-theme="light"] .bg-primary-600.text-white,
+[data-theme="light"] .bg-primary-700.text-white,
+[data-theme="light"] .bg-red-500.text-white,
+[data-theme="light"] .bg-red-600.text-white,
+[data-theme="light"] .bg-green-500.text-white,
+[data-theme="light"] .bg-green-600.text-white,
+[data-theme="light"] .bg-amber-500.text-white { color: #ffffff; }
+
+/* Disabled buttons: muted readable color (overrides the compound rule above) */
+[data-theme="light"] .bg-primary-600.text-white:disabled,
+[data-theme="light"] .bg-primary-700.text-white:disabled { color: #9ca3af; }
+
+/* Fix hover:text-white — dark text on light hover backgrounds */
+[data-theme="light"] .hover\:text-white:hover { color: #111827; }
+
+/* Apply logo tint across all pages in light mode */
+[data-theme="light"] img[alt="SecTube Logo"] { filter: brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(185deg) brightness(0.25); }
+
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #0a0a0a;
+  background-color: rgb(var(--dark-950));
 }
 
 * {
@@ -36,17 +104,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: rgb(var(--dark-950));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3a3a3a;
+  background: rgb(var(--dark-700));
   border-radius: 6px;
-  border: 3px solid #0a0a0a;
+  border: 3px solid rgb(var(--dark-950));
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4a4a4a;
+  background: rgb(var(--dark-600));
 }
 
 /* Selection */

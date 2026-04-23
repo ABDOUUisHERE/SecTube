@@ -93,7 +93,7 @@ const Sidebar = () => {
             </p>
             <Link
               to="/login"
-              className="block text-center bg-primary-600 hover:bg-primary-700 px-3 py-2 rounded-md text-sm font-medium transition border border-primary-700 shadow-sm"
+              className="block text-center bg-primary-600 hover:bg-primary-700 text-white px-3 py-2 rounded-md text-sm font-medium transition border border-primary-700 shadow-sm"
             >
               Sign In
             </Link>

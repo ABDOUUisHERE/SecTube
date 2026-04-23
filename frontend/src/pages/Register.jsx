@@ -287,7 +287,7 @@ const Register = () => {
               <button
                 type="submit"
                 disabled={loading || !acceptedTerms}
-                className="w-full bg-primary-600 hover:bg-primary-700 py-2 rounded-md font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm mt-2"
+                className="w-full bg-primary-600 hover:bg-primary-700 text-white py-2 rounded-md font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm mt-2"
               >
                 {loading ? (
                   <div className="flex items-center justify-center gap-2">

@@ -958,7 +958,7 @@ const Video = () => {
                         <button
                           type="submit"
                           disabled={!comment.trim() || commentMutation.isLoading}
-                          className="px-2.5 sm:px-3 py-1.5 bg-primary-600 hover:bg-primary-700 rounded-md text-xs sm:text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm"
+                          className="px-2.5 sm:px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white rounded-md text-xs sm:text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed border border-primary-700 shadow-sm"
                         >
                           {commentMutation.isLoading ? 'Posting...' : 'Comment'}
                         </button>
