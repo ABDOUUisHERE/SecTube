@@ -1,17 +1,18 @@
 import { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { userAPI, channelAPI } from '../services/api';
 import VideoCard from '../components/VideoCard';
 import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
-import { FaGithub, FaTwitter, FaLinkedin, FaGlobe, FaBug, FaBell, FaRegBell, FaVideo } from 'react-icons/fa';
+import { FaGithub, FaTwitter, FaLinkedin, FaGlobe, FaBug, FaBell, FaRegBell, FaVideo, FaCommentAlt } from 'react-icons/fa';
 import { getAvatarUrl } from '../config/constants';
 
 const Channel = () => {
   const { username } = useParams();
   const { isAuthenticated, user } = useAuthStore();
   const { addToast } = useToastStore();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
 
@@ -275,20 +276,32 @@ const Channel = () => {
               )}
 
               {!isOwnChannel && (
-                <button
-                  onClick={handleSubscribe}
-                  disabled={!isAuthenticated || subscribeMutation.isLoading}
-                  className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-medium text-xs sm:text-sm transition disabled:opacity-50 border ${
-                    !isAuthenticated
-                      ? 'bg-dark-800 text-gray-500 cursor-not-allowed border-dark-700'
-                      : isSubscribed
-                      ? 'bg-dark-800 hover:bg-dark-700 text-gray-300 border-dark-700'
-                      : 'bg-primary-600 hover:bg-primary-700 text-white border-primary-700 shadow-sm'
-                  }`}
-                >
-                  {isSubscribed ? <FaBell size={12} className="sm:w-[14px] sm:h-[14px]" /> : <FaRegBell size={12} className="sm:w-[14px] sm:h-[14px]" />}
-                  {isSubscribed ? 'Subscribed' : 'Subscribe'}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleSubscribe}
+                    disabled={!isAuthenticated || subscribeMutation.isLoading}
+                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-medium text-xs sm:text-sm transition disabled:opacity-50 border ${
+                      !isAuthenticated
+                        ? 'bg-dark-800 text-gray-500 cursor-not-allowed border-dark-700'
+                        : isSubscribed
+                        ? 'bg-dark-800 hover:bg-dark-700 text-gray-300 border-dark-700'
+                        : 'bg-primary-600 hover:bg-primary-700 text-white border-primary-700 shadow-sm'
+                    }`}
+                  >
+                    {isSubscribed ? <FaBell size={12} className="sm:w-[14px] sm:h-[14px]" /> : <FaRegBell size={12} className="sm:w-[14px] sm:h-[14px]" />}
+                    {isSubscribed ? 'Subscribed' : 'Subscribe'}
+                  </button>
+
+                  {isAuthenticated && (
+                    <button
+                      onClick={() => navigate(`/messages?with=${channel._id}`)}
+                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md font-medium text-xs sm:text-sm transition border bg-dark-800 hover:bg-dark-700 text-gray-300 border-dark-700"
+                    >
+                      <FaCommentAlt size={12} className="sm:w-[14px] sm:h-[14px]" />
+                      Message
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>

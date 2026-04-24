@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { useSocket } from './hooks/useSocket';
+import { messageAPI } from './services/api';
+import useMessageStore from './store/messageStore';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import Toast from './components/Toast';
@@ -23,6 +26,7 @@ import Saved from './pages/Saved';
 import Subscriptions from './pages/Subscriptions';
 import Analytics from './pages/Analytics';
 import Admin from './pages/Admin';
+import Messages from './pages/Messages';
 import ProtectedRoute from './components/ProtectedRoute';
 import { FaTimes } from 'react-icons/fa';
 import useAuthStore from './store/authStore';
@@ -33,7 +37,15 @@ function App() {
   const { isOpen } = useSidebarStore();
   const { isAuthenticated } = useAuthStore();
   const { theme } = useThemeStore();
+  const { setUnreadCount } = useMessageStore();
   const location = useLocation();
+
+  // Init socket + unread count when authenticated
+  useSocket();
+  useEffect(() => {
+    if (!isAuthenticated) { setUnreadCount(0); return; }
+    messageAPI.getUnreadCount().then((res) => setUnreadCount(res.data.data)).catch(() => {});
+  }, [isAuthenticated]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -161,6 +173,14 @@ function App() {
             element={
               <ProtectedRoute requireAdmin>
                 <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Messages />
               </ProtectedRoute>
             }
           />

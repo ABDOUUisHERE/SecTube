@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { FaSearch, FaUpload, FaUser, FaSignOutAlt, FaBars, FaCog, FaVideo, FaGavel } from 'react-icons/fa';
+import { FaSearch, FaUpload, FaUser, FaSignOutAlt, FaBars, FaCog, FaVideo, FaGavel, FaCommentAlt } from 'react-icons/fa';
 import { BsStars } from 'react-icons/bs';
 import { useState, useRef, useEffect } from 'react';
 import useAuthStore from '../store/authStore';
@@ -7,6 +7,7 @@ import useToastStore from '../store/toastStore';
 import useSidebarStore from '../store/sidebarStore';
 import useChatbotStore from '../store/chatbotStore';
 import useThemeStore from '../store/themeStore';
+import useMessageStore from '../store/messageStore';
 import ConfirmDialog from './ConfirmDialog';
 import Z_INDEX from '../config/zIndex';
 import { getAvatarUrl } from '../config/constants';
@@ -17,6 +18,7 @@ const Navbar = () => {
   const { toggleSidebar } = useSidebarStore();
   const { toggleChatbot } = useChatbotStore();
   const { theme } = useThemeStore();
+  const { unreadCount } = useMessageStore();
   const navigate = useNavigate();
   const { addToast } = useToastStore();
   const [searchQuery, setSearchQuery] = useState('');
@@ -151,6 +153,24 @@ const Navbar = () => {
           >
             <BsStars size={18} />
           </button>
+
+          {isAuthenticated && (
+            <>
+              <Link
+                to="/messages"
+                className="relative p-1.5 text-gray-500 hover:text-white transition hover:bg-dark-800 rounded-md"
+                title="Messages"
+              >
+                <FaCommentAlt size={16} className="sm:w-[18px] sm:h-[18px]" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-primary-500 text-white text-[9px] font-bold min-w-[14px] h-3.5 rounded-full flex items-center justify-center px-0.5 shadow-[0_0_6px_rgba(14,165,233,0.5)]">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+              <div className="w-px h-5 bg-dark-700 mx-0.5" />
+            </>
+          )}
 
           {isAuthenticated ? (
             <div className="relative" ref={userMenuRef}>

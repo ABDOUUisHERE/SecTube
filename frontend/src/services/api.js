@@ -108,4 +108,13 @@ export const adminAPI = {
   updateVideo: (id, data) => api.put(`/admin/videos/${id}`, data),
 };
 
+// Message API
+export const messageAPI = {
+  send: (data) => api.post('/messages', data),
+  getConversations: () => api.get('/messages/conversations'),
+  getThread: (userId, params) => api.get(`/messages/${userId}`, { params }),
+  markRead: (userId) => api.put(`/messages/${userId}/read`),
+  getUnreadCount: () => api.get('/messages/unread-count'),
+};
+
 export default api;

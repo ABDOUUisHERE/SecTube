@@ -1,5 +1,6 @@
 import './config/env.js'; // Must be first — loads dotenv before any other import reads process.env
 import express from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -15,6 +16,7 @@ import passport from './config/passport.js';
 import { setupSwagger } from './config/swagger.js';
 import { mcpServer } from './config/mcp.js';
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { initSocket } from './socket.js';
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -24,6 +26,7 @@ import channelRoutes from './routes/channels.js';
 import chatRoutes from './routes/chat.js';
 import analyticsRoutes from './routes/analytics.js';
 import adminRoutes from './routes/admin.js';
+import messageRoutes from './routes/messages.js';
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -31,6 +34,8 @@ const __dirname = path.dirname(__filename);
 
 // Initialize Express app
 const app = express();
+const httpServer = createServer(app);
+initSocket(httpServer);
 
 // Trust proxy (required for rate limiting behind Render/Vercel)
 app.set('trust proxy', 1);
@@ -137,6 +142,7 @@ app.use('/api/channels', channelRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -160,7 +166,7 @@ setInterval(flushViewBuffer, 30_000);
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   console.log(`🔒 Security features enabled`);
   console.log(`📹 Video platform ready for cyber security content`);
