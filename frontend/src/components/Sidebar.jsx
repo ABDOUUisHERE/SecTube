@@ -1,13 +1,16 @@
 import { Link, useLocation } from 'react-router-dom';
 import { FaHome, FaFire, FaHistory, FaBookmark, FaVideo, FaBell, FaChartBar } from 'react-icons/fa';
+import { BsMoonFill, BsSunFill } from 'react-icons/bs';
 import useAuthStore from '../store/authStore';
 import useSidebarStore from '../store/sidebarStore';
+import useThemeStore from '../store/themeStore';
 import Z_INDEX from '../config/zIndex';
 
 const Sidebar = () => {
   const location = useLocation();
   const { isAuthenticated, user } = useAuthStore();
   const { isOpen, closeSidebar } = useSidebarStore();
+  const { theme, toggleTheme } = useThemeStore();
 
   const isActive = (path) => {
     return location.pathname === path;
@@ -111,9 +114,32 @@ const Sidebar = () => {
           <p className="text-[10px] text-gray-600 font-medium">
             © {new Date().getFullYear()} SecTube
           </p>
-          <p className="text-[10px] text-gray-500 font-bold mt-1.5">
-            Developed by <a href="https://github.com/MALTOisHERE" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:text-primary-400 transition-colors">MALTO</a>
-          </p>
+          <div className="flex items-center justify-between mt-1.5">
+            <p className="text-[10px] text-gray-500 font-bold">
+              Developed by <a href="https://github.com/MALTOisHERE" target="_blank" rel="noopener noreferrer" className="text-primary-500 hover:text-primary-400 transition-colors">MALTO</a>
+            </p>
+
+            {/* Theme toggle */}
+            <button
+              type="button"
+              role="switch"
+              onClick={toggleTheme}
+              aria-checked={theme === 'light'}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              className={`relative inline-flex h-5 w-9 flex-shrink-0 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                theme === 'light' ? 'bg-amber-400' : 'bg-dark-700'
+              }`}
+            >
+              <span className={`flex items-center justify-center h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-300 ${
+                theme === 'light' ? 'translate-x-[18px]' : 'translate-x-0.5'
+              }`}>
+                {theme === 'dark'
+                  ? <BsMoonFill size={7} className="text-indigo-500" />
+                  : <BsSunFill size={7} className="text-amber-500" />
+                }
+              </span>
+            </button>
+          </div>
         </div>
         </div>
       )}

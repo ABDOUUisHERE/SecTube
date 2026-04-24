@@ -39,7 +39,7 @@ const Home = () => {
             className={`relative px-3 sm:px-4 py-1.5 rounded-md text-xs sm:text-sm font-medium whitespace-nowrap transition-all duration-300 border overflow-hidden group flex-shrink-0 snap-start ${
               category === selectedCategory
                 ? 'bg-primary-600 text-white border-primary-400 shadow-[0_0_15px_rgba(14,165,233,0.25)]'
-                : 'bg-dark-900 text-gray-400 border-dark-700 hover:border-primary-500/50 hover:text-gray-200'
+                : 'bg-dark-900 text-gray-400 border-dark-700 hover:border-primary-500/50 hover:text-white'
             }`}
           >
             {/* Background scanning effect for active button */}

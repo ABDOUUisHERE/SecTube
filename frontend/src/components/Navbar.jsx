@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaUpload, FaUser, FaSignOutAlt, FaBars, FaCog, FaVideo, FaGavel } from 'react-icons/fa';
-import { BsStars, BsMoonFill, BsSunFill } from 'react-icons/bs';
+import { BsStars } from 'react-icons/bs';
 import { useState, useRef, useEffect } from 'react';
 import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
@@ -16,7 +16,7 @@ const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuthStore();
   const { toggleSidebar } = useSidebarStore();
   const { toggleChatbot } = useChatbotStore();
-  const { theme, toggleTheme } = useThemeStore();
+  const { theme } = useThemeStore();
   const navigate = useNavigate();
   const { addToast } = useToastStore();
   const [searchQuery, setSearchQuery] = useState('');
@@ -83,7 +83,7 @@ const Navbar = () => {
         <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={toggleSidebar}
-            className="text-gray-500 hover:text-gray-300 transition p-1.5 sm:p-2 hover:bg-dark-800 rounded-md border border-transparent"
+            className="text-gray-500 hover:text-white transition p-1.5 sm:p-2 hover:bg-dark-800 rounded-md border border-transparent"
             aria-label="Toggle sidebar"
           >
             <FaBars size={16} className="sm:w-[18px] sm:h-[18px]" />
@@ -106,7 +106,7 @@ const Navbar = () => {
           {/* Search Icon (Mobile Only) */}
           <button
             onClick={() => setShowSearch(true)}
-            className="md:hidden p-1.5 text-gray-500 hover:text-gray-300 transition hover:bg-dark-800 rounded-md"
+            className="md:hidden p-1.5 text-gray-500 hover:text-white transition hover:bg-dark-800 rounded-md"
             title="Search"
           >
             <FaSearch size={16} className="sm:w-[18px] sm:h-[18px]" />
@@ -150,27 +150,6 @@ const Navbar = () => {
             title="Ask AI"
           >
             <BsStars size={18} />
-          </button>
-
-          {/* Theme Toggle */}
-          <button
-            type="button"
-            role="switch"
-            onClick={toggleTheme}
-            aria-checked={theme === 'light'}
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors duration-300 focus:outline-none ${
-              theme === 'light' ? 'bg-amber-400' : 'bg-dark-700'
-            }`}
-          >
-            <span className={`flex items-center justify-center h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-300 ${
-              theme === 'light' ? 'translate-x-5' : 'translate-x-0.5'
-            }`}>
-              {theme === 'dark'
-                ? <BsMoonFill size={9} className="text-indigo-500" />
-                : <BsSunFill size={9} className="text-amber-500" />
-              }
-            </span>
           </button>
 
           {isAuthenticated ? (

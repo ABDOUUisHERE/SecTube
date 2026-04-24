@@ -476,7 +476,7 @@ const Video = () => {
                 </div>
 
                 {/* Separator */}
-                <div className="h-px bg-gray-800 mb-6"></div>
+                <div className="h-px bg-dark-800 mb-6"></div>
 
                 {/* Comments list skeleton */}
                 <div className="space-y-1">
@@ -976,7 +976,7 @@ const Video = () => {
               )}
 
               {/* Separator */}
-              <div className="h-px bg-gray-800 mb-6"></div>
+              <div className="h-px bg-dark-800 mb-6"></div>
 
               <div className="space-y-1">
                 {commentsData?.data?.data?.map((comment) => (
@@ -1011,7 +1011,7 @@ const Video = () => {
                             e.target.src = getThumbnailUrl();
                           }}
                         />
-                        <div className="absolute bottom-1 right-1 bg-black bg-opacity-80 px-1 py-0.5 rounded text-xs">
+                        <div className="absolute bottom-1 right-1 bg-black bg-opacity-80 px-1 py-0.5 rounded text-xs text-white">
                           {Math.floor(relatedVideo.duration / 60)}:{(relatedVideo.duration % 60).toString().padStart(2, '0')}
                         </div>
                       </div>
