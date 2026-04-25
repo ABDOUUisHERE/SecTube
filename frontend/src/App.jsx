@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { useSocket } from './hooks/useSocket';
-import { messageAPI } from './services/api';
+import { messageAPI, notificationAPI } from './services/api';
 import useMessageStore from './store/messageStore';
+import useNotificationStore from './store/notificationStore';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import Toast from './components/Toast';
@@ -38,13 +39,15 @@ function App() {
   const { isAuthenticated } = useAuthStore();
   const { theme } = useThemeStore();
   const { setUnreadCount } = useMessageStore();
+  const { setUnreadCount: setNotifCount } = useNotificationStore();
   const location = useLocation();
 
-  // Init socket + unread count when authenticated
+  // Init socket + unread counts when authenticated
   useSocket();
   useEffect(() => {
-    if (!isAuthenticated) { setUnreadCount(0); return; }
+    if (!isAuthenticated) { setUnreadCount(0); setNotifCount(0); return; }
     messageAPI.getUnreadCount().then((res) => setUnreadCount(res.data.data)).catch(() => {});
+    notificationAPI.getUnreadCount().then((res) => setNotifCount(res.data.data)).catch(() => {});
   }, [isAuthenticated]);
 
   useEffect(() => {

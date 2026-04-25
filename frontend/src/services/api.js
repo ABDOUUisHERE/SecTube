@@ -117,4 +117,12 @@ export const messageAPI = {
   getUnreadCount: () => api.get('/messages/unread-count'),
 };
 
+// Notification API
+export const notificationAPI = {
+  getAll:       () => api.get('/notifications'),
+  getUnreadCount: () => api.get('/notifications/unread-count'),
+  markRead:     (id) => api.put(`/notifications/${id}/read`),
+  markAllRead:  () => api.put('/notifications/read-all'),
+};
+
 export default api;

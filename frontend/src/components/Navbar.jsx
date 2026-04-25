@@ -1,17 +1,20 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { FaSearch, FaUpload, FaUser, FaSignOutAlt, FaBars, FaCog, FaVideo, FaGavel, FaCommentAlt } from 'react-icons/fa';
+import { FaSearch, FaSignOutAlt, FaBars, FaCog, FaVideo, FaGavel, FaCommentAlt, FaBell, FaUserPlus, FaReply } from 'react-icons/fa';
 import { BsStars } from 'react-icons/bs';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { formatDistanceToNow } from 'date-fns';
 import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
 import useSidebarStore from '../store/sidebarStore';
 import useChatbotStore from '../store/chatbotStore';
 import useThemeStore from '../store/themeStore';
 import useMessageStore from '../store/messageStore';
+import useNotificationStore from '../store/notificationStore';
 import ConfirmDialog from './ConfirmDialog';
 import Z_INDEX from '../config/zIndex';
 import { getAvatarUrl } from '../config/constants';
 import { useDropdownPosition, getDropdownClasses } from '../hooks/useDropdownPosition';
+import { notificationAPI } from '../services/api';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuthStore();
@@ -19,14 +22,19 @@ const Navbar = () => {
   const { toggleChatbot } = useChatbotStore();
   const { theme } = useThemeStore();
   const { unreadCount } = useMessageStore();
+  const { unreadCount: notifCount, setUnreadCount: setNotifCount } = useNotificationStore();
   const navigate = useNavigate();
   const { addToast } = useToastStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [showNotifs, setShowNotifs] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [notifsLoading, setNotifsLoading] = useState(false);
   const userMenuRef = useRef(null);
   const searchRef = useRef(null);
+  const notifRef = useRef(null);
 
   const userMenuPosition = useDropdownPosition(userMenuRef, showUserMenu, 200);
 
@@ -57,6 +65,65 @@ const Navbar = () => {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [showSearch]);
+
+  // Close notif dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) setShowNotifs(false);
+    };
+    if (showNotifs) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showNotifs]);
+
+  const openNotifs = useCallback(async () => {
+    setShowNotifs((v) => !v);
+    if (!showNotifs) {
+      setNotifsLoading(true);
+      try {
+        const res = await notificationAPI.getAll();
+        setNotifications(res.data.data || []);
+        setNotifCount(res.data.unread || 0);
+      } finally {
+        setNotifsLoading(false);
+      }
+    }
+  }, [showNotifs, setNotifCount]);
+
+  const handleNotifClick = async (notif) => {
+    if (!notif.read) {
+      await notificationAPI.markRead(notif._id).catch(() => {});
+      setNotifications((prev) => prev.map((n) => n._id === notif._id ? { ...n, read: true } : n));
+      setNotifCount(Math.max(0, notifCount - 1));
+    }
+    setShowNotifs(false);
+    if (notif.type === 'subscribe') navigate(`/channel/${notif.actor.username}`);
+    else if (notif.type === 'message') navigate(`/messages?with=${notif.actor._id}`);
+    else navigate(`/video/${notif.entityId}`);
+  };
+
+  const markAllRead = async () => {
+    await notificationAPI.markAllRead().catch(() => {});
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setNotifCount(0);
+  };
+
+  const notifIcon = (type) => {
+    if (type === 'subscribe') return <FaUserPlus size={10} className="text-primary-400" />;
+    if (type === 'reply')     return <FaReply size={10} className="text-yellow-400" />;
+    if (type === 'message')   return <FaCommentAlt size={10} className="text-green-400" />;
+    return <FaCommentAlt size={10} className="text-blue-400" />;
+  };
+
+  const notifText = (n) => {
+    const name = n.actor?.displayName || n.actor?.username || 'Someone';
+    if (n.type === 'comment')   return <><span className="font-semibold text-white">{name}</span> commented on <span className="font-semibold text-white">{n.entityTitle}</span></>;
+    if (n.type === 'reply')     return <><span className="font-semibold text-white">{name}</span> replied to your comment on <span className="font-semibold text-white">{n.entityTitle}</span></>;
+    if (n.type === 'subscribe') return <><span className="font-semibold text-white">{name}</span> subscribed to your channel</>;
+    if (n.type === 'message')   return <><span className="font-semibold text-white">{name}</span> sent you a message</>;
+    return name;
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -168,6 +235,78 @@ const Navbar = () => {
                   </span>
                 )}
               </Link>
+
+              {/* Notification Bell */}
+              <div className="relative" ref={notifRef}>
+                <button
+                  onClick={openNotifs}
+                  className="relative p-1.5 text-gray-500 hover:text-white transition hover:bg-dark-800 rounded-md"
+                  title="Notifications"
+                >
+                  <FaBell size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  {notifCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold min-w-[14px] h-3.5 rounded-full flex items-center justify-center px-0.5 shadow-[0_0_6px_rgba(239,68,68,0.5)]">
+                      {notifCount > 99 ? '99+' : notifCount}
+                    </span>
+                  )}
+                </button>
+
+                {showNotifs && (
+                  <div className="absolute right-0 mt-1 w-80 sm:w-96 bg-dark-900 border border-dark-700 rounded-md shadow-xl z-50 overflow-hidden" style={{ zIndex: Z_INDEX.NAVBAR + 1 }}>
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-dark-800">
+                      <span className="text-sm font-semibold text-white">Notifications</span>
+                      {notifCount > 0 && (
+                        <button onClick={markAllRead} className="text-[10px] text-primary-500 hover:text-primary-400 transition font-medium uppercase tracking-wide">
+                          Mark all read
+                        </button>
+                      )}
+                    </div>
+
+                    {/* List */}
+                    <div className="max-h-96 overflow-y-auto scrollbar-thin">
+                      {notifsLoading ? (
+                        <div className="flex justify-center py-8">
+                          <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      ) : notifications.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 text-center px-4">
+                          <FaBell className="text-gray-700 mb-2" size={28} />
+                          <p className="text-sm text-gray-500">No notifications yet</p>
+                        </div>
+                      ) : (
+                        notifications.map((n) => (
+                          <button
+                            key={n._id}
+                            onClick={() => handleNotifClick(n)}
+                            className={`w-full flex items-start gap-3 px-4 py-3 text-left transition hover:bg-dark-800/60 border-b border-dark-800/50 last:border-0 ${!n.read ? 'bg-dark-800/30' : ''}`}
+                          >
+                            <div className="relative flex-shrink-0 mt-0.5">
+                              <img
+                                src={getAvatarUrl(n.actor?.avatar)}
+                                alt=""
+                                className="w-8 h-8 rounded-full object-cover border border-dark-700"
+                                onError={(e) => { e.target.src = getAvatarUrl(); }}
+                              />
+                              <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-dark-900 border border-dark-700 flex items-center justify-center">
+                                {notifIcon(n.type)}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-gray-300 leading-relaxed">{notifText(n)}</p>
+                              <p className="text-[10px] text-gray-600 mt-0.5">
+                                {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
+                              </p>
+                            </div>
+                            {!n.read && <div className="w-1.5 h-1.5 rounded-full bg-primary-500 flex-shrink-0 mt-1.5" />}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="w-px h-5 bg-dark-700 mx-0.5" />
             </>
           )}

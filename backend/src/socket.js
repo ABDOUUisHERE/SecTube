@@ -2,12 +2,19 @@ import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import User from './models/User.js';
 import Message from './models/Message.js';
+import { createNotification } from './controllers/notificationController.js';
 
 // userId -> socketId
 const onlineUsers = new Map();
+let ioInstance = null;
+
+export const emitToUser = (userId, event, data) => {
+  const socketId = onlineUsers.get(String(userId));
+  if (socketId && ioInstance) ioInstance.to(socketId).emit(event, data);
+};
 
 export const initSocket = (httpServer) => {
-  const io = new Server(httpServer, {
+  ioInstance = new Server(httpServer, {
     cors: {
       origin: process.env.FRONTEND_URL || 'http://localhost:5173',
       credentials: true,
@@ -15,7 +22,7 @@ export const initSocket = (httpServer) => {
   });
 
   // Auth middleware
-  io.use(async (socket, next) => {
+  ioInstance.use(async (socket, next) => {
     const token = socket.handshake.auth?.token;
     if (!token) return next(new Error('Unauthorized'));
     try {
@@ -29,7 +36,7 @@ export const initSocket = (httpServer) => {
     }
   });
 
-  io.on('connection', (socket) => {
+  ioInstance.on('connection', (socket) => {
     const userId = String(socket.user._id);
     onlineUsers.set(userId, socket.id);
 
@@ -50,10 +57,17 @@ export const initSocket = (httpServer) => {
         ]);
 
         // Deliver to recipient if online
-        const recipientSocketId = onlineUsers.get(String(receiverId));
-        if (recipientSocketId) {
-          io.to(recipientSocketId).emit('message:receive', populated);
-        }
+        emitToUser(String(receiverId), 'message:receive', populated);
+
+        // Notify recipient
+        createNotification({
+          recipient:   receiverId,
+          type:        'message',
+          actor:       { _id: socket.user._id, username: socket.user.username, displayName: socket.user.displayName, avatar: socket.user.avatar },
+          entityId:    message._id,
+          entityType:  'message',
+          entityTitle: content.trim().slice(0, 60),
+        });
 
         // Confirm back to sender
         ack?.({ success: true, data: populated });
@@ -67,5 +81,5 @@ export const initSocket = (httpServer) => {
     });
   });
 
-  return io;
+  return ioInstance;
 };

@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Video from '../models/Video.js';
+import { createNotification } from './notificationController.js';
 
 // Get user profile
 export const getUser = async (req, res, next) => {
@@ -120,6 +121,15 @@ export const subscribe = async (req, res, next) => {
       currentUser.subscribedTo.push(req.params.userId);
       await currentUser.save();
     }
+
+    createNotification({
+      recipient:  userToSubscribe._id,
+      type:       'subscribe',
+      actor:      { _id: req.user._id, username: req.user.username, displayName: req.user.displayName, avatar: req.user.avatar },
+      entityId:   req.user._id,
+      entityType: 'video',
+      entityTitle: null,
+    });
 
     res.status(200).json({
       success: true,

@@ -22,6 +22,8 @@ const Video = () => {
   const queryClient = useQueryClient();
   const [comment, setComment] = useState('');
   const [showDescription, setShowDescription] = useState(false);
+  const [descClamped, setDescClamped] = useState(false);
+  const descRef = useRef(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
@@ -49,6 +51,13 @@ const Video = () => {
   const [isDisliked, setIsDisliked] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+
+  // Detect if description is visually truncated (actual overflow, not character count)
+  useEffect(() => {
+    if (!showDescription && descRef.current) {
+      setDescClamped(descRef.current.scrollHeight > descRef.current.clientHeight);
+    }
+  }, [video?.description, showDescription]);
 
   // Update local state when video data changes
   useEffect(() => {
@@ -586,8 +595,8 @@ const Video = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-0 sm:gap-4 md:gap-6">
           {/* Main content */}
           <div className="md:col-span-12 lg:col-span-9">
-            {/* Video player */}
-            <div className="mb-3 sm:mb-4">
+            {/* Video player — sticky on mobile, normal flow on sm+ */}
+            <div className="sticky top-14 sm:static z-10 sm:z-auto bg-black sm:bg-transparent mb-0 sm:mb-4">
               <VideoPlayer video={video} />
             </div>
 
@@ -644,12 +653,13 @@ const Video = () => {
                     <button
                       onClick={() => likeMutation.mutate()}
                       disabled={!isAuthenticated}
-                      className={`px-3 py-2 rounded-l-full transition ${
+                      className={`flex items-center px-3 py-2 rounded-l-full transition ${
                         isLiked ? 'text-primary-500' : 'text-gray-400 hover:bg-dark-800'
                       }`}
                       title={`${video?.likeCount || 0} likes`}
                     >
                       <FaThumbsUp size={14} />
+                      <span className="ml-1.5 text-xs">{video?.likeCount || 0}</span>
                     </button>
                     <div className="w-px h-4 bg-dark-700"></div>
                     <button
@@ -889,14 +899,14 @@ const Video = () => {
                 <span className="bg-dark-800 px-1.5 sm:px-2 py-0.5 rounded text-xs border border-dark-700">{sanitize(video.difficulty)}</span>
               </div>
 
-              <div className={`text-xs sm:text-sm whitespace-pre-wrap ${!showDescription && 'line-clamp-2'}`}>
+              <div ref={descRef} className={`text-xs sm:text-sm whitespace-pre-wrap ${!showDescription && 'line-clamp-2'}`}>
                 {sanitize(video.description)}
               </div>
 
-              {video.description.length > 100 && (
+              {(descClamped || showDescription) && (
                 <button
                   onClick={() => setShowDescription(!showDescription)}
-                  className="text-xs sm:text-sm text-gray-400 hover:text-white mt-2"
+                  className="text-xs sm:text-sm text-gray-500 hover:text-gray-300 mt-2"
                 >
                   {showDescription ? 'Show less' : 'Show more'}
                 </button>

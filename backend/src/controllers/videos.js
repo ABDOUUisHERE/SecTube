@@ -1,4 +1,5 @@
 import { validationResult } from 'express-validator';
+import { createNotification } from './notificationController.js';
 import Video from '../models/Video.js';
 import Comment from '../models/Comment.js';
 import User from '../models/User.js';
@@ -530,6 +531,21 @@ export const addComment = async (req, res, next) => {
     });
 
     await comment.populate('user', 'username displayName avatar');
+
+    const actor = { _id: req.user._id, username: req.user.username, displayName: req.user.displayName, avatar: req.user.avatar };
+
+    if (parentComment) {
+      // Reply — notify the parent comment author
+      const parent = await Comment.findById(parentComment).select('user');
+      if (parent && String(parent.user) !== String(req.user._id)) {
+        createNotification({ recipient: parent.user, type: 'reply', actor, entityId: video._id, entityType: 'video', entityTitle: video.title });
+      }
+    } else {
+      // Top-level comment — notify the video uploader
+      if (String(video.uploader) !== String(req.user._id)) {
+        createNotification({ recipient: video.uploader, type: 'comment', actor, entityId: video._id, entityType: 'video', entityTitle: video.title });
+      }
+    }
 
     res.status(201).json({
       success: true,
