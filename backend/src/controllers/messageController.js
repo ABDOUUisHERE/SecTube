@@ -112,24 +112,33 @@ export const getConversations = async (req, res) => {
 // GET /api/messages/:userId
 export const getThread = async (req, res) => {
   try {
-    const me    = req.user._id;
-    const other = req.params.userId;
-    const page  = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
+    const me     = req.user._id;
+    const other  = req.params.userId;
+    const limit  = Math.min(parseInt(req.query.limit) || 50, 100);
+    const before = req.query.before; // oldest message _id cursor
 
-    const messages = await Message.find({
+    const match = {
       $or: [
         { sender: me,    receiver: other },
         { sender: other, receiver: me },
       ],
-    })
+    };
+
+    if (before) {
+      const cursor = await Message.findById(before).select('createdAt').lean();
+      if (cursor) match.createdAt = { $lt: cursor.createdAt };
+    }
+
+    const messages = await Message.find(match)
       .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
+      .limit(limit + 1)
       .populate('sender',   'username displayName avatar')
       .populate('receiver', 'username displayName avatar');
 
-    res.json({ success: true, data: messages.reverse() });
+    const hasMore = messages.length > limit;
+    if (hasMore) messages.pop();
+
+    res.json({ success: true, data: messages.reverse(), hasMore });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from 'react-query';
+import useInfiniteScroll from '../hooks/useInfiniteScroll';
 import { formatDistanceToNow } from 'date-fns';
 import { FaThumbsUp, FaThumbsDown, FaShare, FaRegSmile, FaBell, FaRegBell, FaTwitter, FaLinkedin, FaFacebook, FaWhatsapp, FaTelegram, FaCopy, FaCheck, FaExclamationTriangle, FaBookmark, FaRegBookmark, FaEllipsisV } from 'react-icons/fa';
 import { videoAPI, userAPI } from '../services/api';
@@ -82,9 +83,27 @@ const Video = () => {
     checkSaved();
   }, [isAuthenticated, videoId]);
 
-  const { data: commentsData } = useQuery(
+  const {
+    data: commentsData,
+    fetchNextPage: fetchMoreComments,
+    hasNextPage: hasMoreComments,
+    isFetchingNextPage: isFetchingMoreComments,
+  } = useInfiniteQuery(
     ['comments', videoId],
-    () => videoAPI.getComments(videoId)
+    ({ pageParam = 1 }) => videoAPI.getComments(videoId, { page: pageParam, limit: 20 }),
+    {
+      getNextPageParam: (lastPage) => {
+        const { page, pages } = lastPage.data;
+        return page < pages ? page + 1 : undefined;
+      },
+    }
+  );
+  const allComments   = commentsData?.pages?.flatMap(p => p.data.data) ?? [];
+  const totalComments = commentsData?.pages?.[0]?.data?.total ?? 0;
+
+  const commentsSentinelRef = useInfiniteScroll(
+    () => { if (hasMoreComments && !isFetchingMoreComments) fetchMoreComments(); },
+    { enabled: !!hasMoreComments && !isFetchingMoreComments }
   );
 
   // Fetch related videos (same category, excluding current video)
@@ -870,7 +889,7 @@ const Video = () => {
                 <span className="bg-dark-800 px-1.5 sm:px-2 py-0.5 rounded text-xs border border-dark-700">{sanitize(video.difficulty)}</span>
               </div>
 
-              <div className={`text-xs sm:text-sm ${!showDescription && 'line-clamp-2'}`}>
+              <div className={`text-xs sm:text-sm whitespace-pre-wrap ${!showDescription && 'line-clamp-2'}`}>
                 {sanitize(video.description)}
               </div>
 
@@ -900,7 +919,7 @@ const Video = () => {
             {/* Comments */}
             <div className="px-3 sm:px-0">
               <h2 className="text-base sm:text-lg font-medium mb-3 sm:mb-4">
-                {commentsData?.data?.total || 0} Comments
+                {totalComments} Comments
               </h2>
 
               {isAuthenticated ? (
@@ -979,7 +998,7 @@ const Video = () => {
               <div className="h-px bg-dark-800 mb-6"></div>
 
               <div className="space-y-1">
-                {commentsData?.data?.data?.map((comment) => (
+                {allComments.map((comment) => (
                   <CommentItem
                     key={comment._id}
                     comment={comment}
@@ -987,6 +1006,12 @@ const Video = () => {
                     onReplySubmit={handleReplySubmit}
                   />
                 ))}
+                <div ref={commentsSentinelRef} className="h-2" />
+                {isFetchingMoreComments && (
+                  <div className="flex justify-center py-4">
+                    <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
               </div>
             </div>
           </div>

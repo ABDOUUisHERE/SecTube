@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useQuery } from 'react-query';
+import { useInfiniteQuery } from 'react-query';
 import { useSearchParams } from 'react-router-dom';
-import { FaFilter, FaSortAmountDown, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaFilter, FaSortAmountDown } from 'react-icons/fa';
 import { videoAPI } from '../services/api';
 import VideoCard from '../components/VideoCard';
 import CustomSelect from '../components/CustomSelect';
+import useInfiniteScroll from '../hooks/useInfiniteScroll';
 
 const categories = [
   'All',
@@ -37,31 +38,56 @@ const Browse = () => {
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All');
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
   const [sortBy, setSortBy] = useState('latest');
-  const [page, setPage] = useState(1);
 
-  const queryParams = {
-    page,
+  const filters = {
     limit: 24,
     ...(selectedCategory !== 'All' && { category: selectedCategory }),
     ...(selectedDifficulty !== 'All' && { difficulty: selectedDifficulty }),
     sort: sortBy === 'popular' ? 'popular' : sortBy === 'oldest' ? 'oldest' : '-uploadedAt',
   };
 
-  const { data, isLoading } = useQuery(
-    ['browse-videos', queryParams],
-    () => videoAPI.getVideos(queryParams),
-    { keepPreviousData: true }
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
+    ['browse-videos', filters],
+    ({ pageParam = 1 }) => videoAPI.getVideos({ ...filters, page: pageParam }),
+    {
+      getNextPageParam: (lastPage) => {
+        const { page, pages } = lastPage.data;
+        return page < pages ? page + 1 : undefined;
+      },
+      keepPreviousData: false,
+    }
+  );
+
+  const videos = data?.pages?.flatMap(p => p.data.data) ?? [];
+  const total  = data?.pages?.[0]?.data?.total ?? 0;
+
+  const sentinelRef = useInfiniteScroll(
+    () => { if (hasNextPage && !isFetchingNextPage) fetchNextPage(); },
+    { enabled: !!hasNextPage && !isFetchingNextPage }
   );
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-    setPage(1);
-    if (category !== 'All') {
-      setSearchParams({ category });
-    } else {
-      setSearchParams({});
-    }
+    if (category !== 'All') setSearchParams({ category });
+    else setSearchParams({});
   };
+
+  const SkeletonGrid = () => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-0 sm:gap-x-4 gap-y-6 sm:gap-y-8">
+      {[...Array(8)].map((_, i) => (
+        <div key={i}>
+          <div className="aspect-video bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-none sm:rounded-md border-y sm:border border-dark-800 mb-2 animate-shimmer"></div>
+          <div className="flex gap-2 px-3 sm:px-0">
+            <div className="w-8 h-8 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-full border border-dark-800 flex-shrink-0 animate-shimmer"></div>
+            <div className="flex-1 min-w-0 space-y-1.5">
+              <div className="h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-full"></div>
+              <div className="h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-3/4"></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div className="px-0 sm:px-4 md:px-6 py-4 sm:py-6 min-h-screen">
@@ -83,57 +109,35 @@ const Browse = () => {
             value={selectedCategory}
             onChange={handleCategoryChange}
           />
-
           <CustomSelect
             label="Difficulty"
             icon={FaFilter}
             options={difficulties}
             value={selectedDifficulty}
-            onChange={(val) => {
-              setSelectedDifficulty(val);
-              setPage(1);
-            }}
+            onChange={(val) => setSelectedDifficulty(val)}
           />
-
           <CustomSelect
             label="Sort By"
             icon={FaSortAmountDown}
             options={sortOptions}
             value={sortBy}
-            onChange={(val) => {
-              setSortBy(val);
-              setPage(1);
-            }}
+            onChange={(val) => setSortBy(val)}
           />
         </div>
 
-        {/* Results Count */}
-        {data?.data?.total > 0 && (
+        {total > 0 && (
           <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-dark-800">
             <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-500">
-              <span className="text-primary-500">{data.data.total}</span> videos found
+              <span className="text-primary-500">{total}</span> videos found
             </p>
           </div>
         )}
       </div>
 
       {/* Videos Grid */}
-      {isLoading && page === 1 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-0 sm:gap-x-4 gap-y-6 sm:gap-y-8">
-          {[...Array(8)].map((_, i) => (
-            <div key={i}>
-              <div className="aspect-video bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-none sm:rounded-md border-y sm:border border-dark-800 mb-2 animate-shimmer"></div>
-              <div className="flex gap-2 px-3 sm:px-0">
-                <div className="w-8 h-8 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-full border border-dark-800 flex-shrink-0 animate-shimmer"></div>
-                <div className="flex-1 min-w-0 space-y-1.5">
-                  <div className="h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-full"></div>
-                  <div className="h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-3/4"></div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : data?.data?.data?.length === 0 ? (
+      {isLoading ? (
+        <SkeletonGrid />
+      ) : videos.length === 0 ? (
         <div className="py-12 sm:py-20 text-center px-3">
           <FaFilter className="text-gray-700 mx-auto mb-4" size={40} />
           <h2 className="text-base sm:text-lg font-medium text-white mb-2">No videos found</h2>
@@ -142,75 +146,19 @@ const Browse = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-0 sm:gap-x-4 gap-y-6 sm:gap-y-8">
-            {data?.data?.data?.map((video) => (
+            {videos.map((video) => (
               <VideoCard key={video._id} video={video} />
             ))}
-            {isLoading && page > 1 && (
-              [...Array(3)].map((_, i) => (
-                <div key={`loading-${i}`}>
-                  <div className="aspect-video bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-none sm:rounded-md border-y sm:border border-dark-800 mb-2 animate-shimmer"></div>
-                  <div className="px-3 sm:px-0">
-                    <div className="h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-3/4"></div>
-                  </div>
+            {isFetchingNextPage && [...Array(3)].map((_, i) => (
+              <div key={`sk-${i}`}>
+                <div className="aspect-video bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded-none sm:rounded-md border-y sm:border border-dark-800 mb-2 animate-shimmer"></div>
+                <div className="px-3 sm:px-0">
+                  <div className="h-4 bg-gradient-to-r from-dark-900 via-dark-800 to-dark-900 bg-[length:200%_100%] rounded animate-shimmer w-3/4"></div>
                 </div>
-              ))
-            )}
-          </div>
-
-          {/* Pagination */}
-          {data?.data?.pages > 1 && (
-            <div className="flex justify-center items-center gap-2 sm:gap-3 mt-12 mb-8">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-dark-900 hover:bg-dark-800 border border-dark-700 rounded-md text-xs sm:text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <FaChevronLeft size={10} className="sm:w-3 sm:h-3" />
-                <span className="hidden sm:inline">Previous</span>
-                <span className="sm:hidden">Prev</span>
-              </button>
-
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                {[...Array(data?.data?.pages)].map((_, idx) => {
-                  const pageNum = idx + 1;
-                  // Show only current page, 2 pages before and after
-                  if (
-                    pageNum === 1 ||
-                    pageNum === data?.data?.pages ||
-                    (pageNum >= page - 1 && pageNum <= page + 1)
-                  ) {
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => setPage(pageNum)}
-                        className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-md text-xs sm:text-sm font-medium transition border ${
-                          page === pageNum
-                            ? 'bg-primary-600 border-primary-700 text-white'
-                            : 'bg-dark-900 border-dark-700 text-gray-400 hover:bg-dark-800 hover:text-white'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  }
-                  // Show ellipsis
-                  if (pageNum === page - 2 || pageNum === page + 2) {
-                    return <span key={idx} className="text-gray-600 text-xs sm:text-sm">...</span>;
-                  }
-                  return null;
-                })}
               </div>
-
-              <button
-                onClick={() => setPage((p) => Math.min(data?.data?.pages, p + 1))}
-                disabled={page === data?.data?.pages}
-                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 bg-dark-900 hover:bg-dark-800 border border-dark-700 rounded-md text-xs sm:text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span>Next</span>
-                <FaChevronRight size={10} className="sm:w-3 sm:h-3" />
-              </button>
-            </div>
-          )}
+            ))}
+          </div>
+          <div ref={sentinelRef} className="h-4" />
         </>
       )}
     </div>

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useQuery } from 'react-query';
+import { useInfiniteQuery } from 'react-query';
 import { videoAPI } from '../services/api';
 import VideoCard from '../components/VideoCard';
 import VideoCardSkeleton from '../components/VideoCardSkeleton';
+import useInfiniteScroll from '../hooks/useInfiniteScroll';
 
 const categories = [
   'All',
@@ -18,13 +19,27 @@ const categories = [
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const { data: videosData, isLoading } = useQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
     ['home-videos', selectedCategory],
-    () => videoAPI.getVideos({
+    ({ pageParam = 1 }) => videoAPI.getVideos({
+      page: pageParam,
       limit: 24,
       sort: 'popular',
       ...(selectedCategory !== 'All' && { category: selectedCategory })
-    })
+    }),
+    {
+      getNextPageParam: (lastPage) => {
+        const { page, pages } = lastPage.data;
+        return page < pages ? page + 1 : undefined;
+      }
+    }
+  );
+
+  const videos = data?.pages?.flatMap(p => p.data.data) ?? [];
+
+  const sentinelRef = useInfiniteScroll(
+    () => { if (hasNextPage && !isFetchingNextPage) fetchNextPage(); },
+    { enabled: !!hasNextPage && !isFetchingNextPage }
   );
 
   return (
@@ -42,11 +57,9 @@ const Home = () => {
                 : 'bg-dark-900 text-gray-400 border-dark-700 hover:border-primary-500/50 hover:text-white'
             }`}
           >
-            {/* Background scanning effect for active button */}
             {category === selectedCategory && (
               <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full animate-[btn-scan_2s_infinite]"></div>
             )}
-            
             <span className="relative z-10 flex items-center gap-2">
               {category === selectedCategory && <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>}
               {category}
@@ -71,11 +84,15 @@ const Home = () => {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-0 sm:gap-x-4 gap-y-6 sm:gap-y-8">
-          {videosData?.data?.data?.map((video) => (
-            <VideoCard key={video._id} video={video} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-0 sm:gap-x-4 gap-y-6 sm:gap-y-8">
+            {videos.map((video) => (
+              <VideoCard key={video._id} video={video} />
+            ))}
+            {isFetchingNextPage && [...Array(4)].map((_, i) => <VideoCardSkeleton key={`sk-${i}`} />)}
+          </div>
+          <div ref={sentinelRef} className="h-4" />
+        </>
       )}
     </div>
   );

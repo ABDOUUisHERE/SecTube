@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { FaPaperPlane, FaArrowLeft, FaCommentAlt } from 'react-icons/fa';
+import { FaArrowLeft, FaCommentAlt } from 'react-icons/fa';
+import { IoSend } from 'react-icons/io5';
 import { formatDistanceToNow } from 'date-fns';
 import useAuthStore from '../store/authStore';
 import useMessageStore from '../store/messageStore';
@@ -21,14 +22,14 @@ const Messages = () => {
   const [activeUserId, setActiveUserId] = useState(searchParams.get('with') || null);
   const [activeUser, setActiveUser] = useState(null);
   const [thread, setThread] = useState([]);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [loadingConvs, setLoadingConvs] = useState(true);
   const [loadingThread, setLoadingThread] = useState(false);
-  const bottomRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
-  const isInitialLoad = useRef(true);
 
   const loadConversations = useCallback(async () => {
     try {
@@ -45,7 +46,6 @@ const Messages = () => {
 
   useEffect(() => {
     if (!activeUserId) return;
-    isInitialLoad.current = true; // reset so next thread load scrolls instantly
     const conv = conversations.find((c) => String(c.otherUser?._id) === String(activeUserId));
     if (conv) setActiveUser(conv.otherUser);
   }, [activeUserId, conversations]);
@@ -54,10 +54,12 @@ const Messages = () => {
     if (!activeUserId) return;
     setLoadingThread(true);
     setThread([]);
+    setHasMore(false);
 
     messageAPI.getThread(activeUserId)
       .then((res) => {
         setThread(res.data.data || []);
+        setHasMore(res.data.hasMore || false);
         return messageAPI.markRead(activeUserId);
       })
       .then(() => {
@@ -69,34 +71,59 @@ const Messages = () => {
       .finally(() => setLoadingThread(false));
   }, [activeUserId]);
 
-  const scrollToBottom = (smooth = false) => {
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      const el = messagesContainerRef.current;
-      if (!el) return;
-      if (smooth) {
-        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
-      } else {
-        el.scrollTop = el.scrollHeight;
-      }
-    }));
-  };
+  const loadMoreMessages = useCallback(async () => {
+    if (!hasMore || loadingMore || loadingThread || thread.length === 0) return;
+    setLoadingMore(true);
+    const oldestId = thread[0]._id;
+    const container = messagesContainerRef.current;
+    const prevScrollHeight = container?.scrollHeight || 0;
+    try {
+      const res = await messageAPI.getThread(activeUserId, { before: oldestId });
+      const older = res.data.data || [];
+      setThread((prev) => [...older, ...prev]);
+      setHasMore(res.data.hasMore || false);
+      requestAnimationFrame(() => {
+        if (container) container.scrollTop = container.scrollHeight - prevScrollHeight;
+      });
+    } catch {
+      // silently fail
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [hasMore, loadingMore, loadingThread, thread, activeUserId]);
 
-  // Scroll instantly when initial load finishes (loadingThread → false)
+  // Scroll-to-top detection to load older messages
   useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container || !hasMore || loadingMore || loadingThread) return;
+    const handleScroll = () => {
+      if (container.scrollTop < 80) loadMoreMessages();
+    };
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [hasMore, loadingMore, loadingThread, loadMoreMessages]);
+
+  // Scroll to bottom only when a new message is appended (last message ID changes)
+  // Prepending older messages changes the first message, not the last → no scroll
+  const prevLastMsgIdRef = useRef(null);
+  useEffect(() => {
+    if (loadingThread || thread.length === 0) return;
+    const lastId = thread[thread.length - 1]._id;
+    if (prevLastMsgIdRef.current !== null && lastId !== prevLastMsgIdRef.current) {
+      const el = messagesContainerRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    }
+    prevLastMsgIdRef.current = lastId;
+  }, [thread, loadingThread]);
+
+  // Instantly position at bottom before first paint when thread loads
+  useLayoutEffect(() => {
     if (!loadingThread && thread.length > 0) {
-      scrollToBottom(false);
+      const el = messagesContainerRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
     }
   }, [loadingThread]);
 
-  // Smooth scroll when a new real-time message arrives (thread grows after load)
-  const prevThreadLen = useRef(0);
-  useEffect(() => {
-    if (loadingThread) { prevThreadLen.current = thread.length; return; }
-    if (thread.length > prevThreadLen.current) {
-      scrollToBottom(true);
-    }
-    prevThreadLen.current = thread.length;
-  }, [thread]);
 
   useEffect(() => {
     setOnMessage((message) => {
@@ -131,6 +158,7 @@ const Messages = () => {
 
     const content = input.trim();
     setInput('');
+    if (inputRef.current) inputRef.current.style.height = 'auto';
     setSending(true);
 
     const optimistic = {
@@ -201,7 +229,9 @@ const Messages = () => {
                   className={`w-full flex items-center gap-3 px-4 py-3 transition-all text-left border-l-2 ${
                     isActive
                       ? 'bg-dark-800 border-primary-500'
-                      : 'border-transparent hover:bg-dark-800/60 hover:border-dark-700'
+                      : conv.unread > 0
+                        ? 'bg-dark-800/40 border-transparent hover:bg-dark-800/60 hover:border-dark-700'
+                        : 'border-transparent hover:bg-dark-800/60 hover:border-dark-700'
                   }`}
                 >
                   <div className="relative flex-shrink-0">
@@ -282,6 +312,11 @@ const Messages = () => {
 
             {/* Messages */}
             <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-2 scrollbar-thin">
+              {loadingMore && (
+                <div className="flex justify-center py-2">
+                  <div className="w-5 h-5 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              )}
               {loadingThread ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="w-7 h-7 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
@@ -306,7 +341,7 @@ const Messages = () => {
                         />
                       )}
                       <div className={`max-w-[68%] flex flex-col gap-0.5 ${isMine ? 'items-end' : 'items-start'}`}>
-                        <div className={`px-3 py-2 rounded-md text-sm leading-relaxed break-words border ${
+                        <div className={`px-3 py-2 rounded-md text-sm leading-relaxed break-words whitespace-pre-wrap border ${
                           isMine
                             ? `bg-primary-600 border-primary-700 text-white ${msg._optimistic ? 'opacity-60' : ''}`
                             : 'bg-dark-800 border-dark-700 text-gray-100'
@@ -321,31 +356,36 @@ const Messages = () => {
                   );
                 })
               )}
-              <div ref={bottomRef} />
             </div>
 
             {/* Input */}
-            <form onSubmit={handleSend} className="flex items-end gap-0 px-4 py-3 border-t border-dark-800 bg-dark-900 flex-shrink-0">
+            <form onSubmit={handleSend} className="flex items-end gap-2 px-4 py-3 border-t border-dark-800 bg-dark-900 flex-shrink-0">
               <textarea
                 ref={inputRef}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = Math.min(e.target.scrollHeight, 112) + 'px';
+                }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(e); }
                 }}
-                placeholder="Write a message..."
-                rows={1}
-                className="flex-1 bg-dark-950 border border-dark-700 hover:border-dark-600 rounded-l-md px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none transition-colors max-h-28 overflow-y-auto"
+                placeholder="Write a message... (Shift+Enter for new line)"
+                rows={3}
+                className="flex-1 bg-dark-950 border border-dark-700 hover:border-dark-600 rounded-md px-4 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none transition-colors overflow-y-auto"
+                style={{ maxHeight: '112px' }}
               />
               <button
                 type="submit"
                 disabled={!input.trim() || sending}
-                className="bg-dark-800 hover:bg-dark-700 disabled:opacity-40 disabled:cursor-not-allowed border border-l-0 border-dark-700 hover:border-dark-600 rounded-r-md px-4 py-2 h-full transition-colors flex items-center justify-center"
+                className={`flex-shrink-0 w-10 h-10 border rounded-full transition-colors flex items-center justify-center disabled:cursor-not-allowed ${
+                  input.trim() && !sending
+                    ? 'bg-primary-600 hover:bg-primary-700 border-primary-700 text-white'
+                    : 'bg-dark-800 hover:bg-dark-700 border-dark-700 text-gray-600 opacity-50'
+                }`}
               >
-                <FaPaperPlane
-                  size={14}
-                  className={input.trim() ? 'text-primary-400' : 'text-gray-600'}
-                />
+                <IoSend size={16} />
               </button>
             </form>
           </>

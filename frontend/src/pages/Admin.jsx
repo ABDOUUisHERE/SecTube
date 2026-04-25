@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { adminAPI } from '../services/api';
 import useToastStore from '../store/toastStore';
 import Card from '../components/Card';
-import { FaUsers, FaVideo, FaComments, FaEye, FaUserShield, FaBan, FaTrash, FaCheckCircle, FaSearch, FaFilter, FaInfoCircle, FaCopy, FaExclamationTriangle } from 'react-icons/fa';
+import { FaUsers, FaVideo, FaComments, FaEye, FaUserShield, FaBan, FaTrash, FaCheckCircle, FaSearch, FaFilter, FaInfoCircle, FaCopy, FaExclamationTriangle, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { format } from 'date-fns';
 import { getThumbnailUrl, getAvatarUrl } from '../config/constants';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -372,6 +372,7 @@ const UserManagement = () => {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
+
             <tbody className="divide-y divide-dark-800">
               {filteredUsers.map((user) => (
                 <tr key={user._id} className="hover:bg-dark-800/30 transition-colors">
@@ -445,6 +446,27 @@ const UserManagement = () => {
             </tbody>
           </table>
         </div>
+        {usersData?.data?.pages > 1 && (
+          <div className="flex justify-between items-center px-6 py-3 border-t border-dark-800 bg-dark-950">
+            <span className="text-xs text-gray-500">Page {page} of {usersData.data.pages}</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="p-1.5 rounded-md bg-dark-800 hover:bg-dark-700 border border-dark-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                <FaChevronLeft size={11} />
+              </button>
+              <button
+                onClick={() => setPage(p => Math.min(usersData.data.pages, p + 1))}
+                disabled={page === usersData.data.pages}
+                className="p-1.5 rounded-md bg-dark-800 hover:bg-dark-700 border border-dark-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                <FaChevronRight size={11} />
+              </button>
+            </div>
+          </div>
+        )}
       </Card>
 
       <ConfirmDialog
@@ -635,6 +657,27 @@ const VideoManagement = () => {
             </tbody>
           </table>
         </div>
+        {videosData?.data?.pages > 1 && (
+          <div className="flex justify-between items-center px-6 py-3 border-t border-dark-800 bg-dark-950">
+            <span className="text-xs text-gray-500">Page {page} of {videosData.data.pages}</span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="p-1.5 rounded-md bg-dark-800 hover:bg-dark-700 border border-dark-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                <FaChevronLeft size={11} />
+              </button>
+              <button
+                onClick={() => setPage(p => Math.min(videosData.data.pages, p + 1))}
+                disabled={page === videosData.data.pages}
+                className="p-1.5 rounded-md bg-dark-800 hover:bg-dark-700 border border-dark-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              >
+                <FaChevronRight size={11} />
+              </button>
+            </div>
+          </div>
+        )}
       </Card>
 
       <ConfirmDialog

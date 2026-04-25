@@ -1,27 +1,40 @@
-import { useQuery } from 'react-query';
+import { useInfiniteQuery } from 'react-query';
 import { useSearchParams } from 'react-router-dom';
 import { videoAPI } from '../services/api';
 import VideoCard from '../components/VideoCard';
 import { FaSearch } from 'react-icons/fa';
+import useInfiniteScroll from '../hooks/useInfiniteScroll';
 
 const Search = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
 
-  const { data, isLoading } = useQuery(
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
     ['search', query],
-    () => videoAPI.searchVideos({ q: query }),
+    ({ pageParam = 1 }) => videoAPI.searchVideos({ q: query, page: pageParam, limit: 24 }),
     {
       enabled: !!query,
+      getNextPageParam: (lastPage) => {
+        const { page, pages } = lastPage.data;
+        return page < pages ? page + 1 : undefined;
+      },
     }
+  );
+
+  const videos = data?.pages?.flatMap(p => p.data.data) ?? [];
+  const total  = data?.pages?.[0]?.data?.total ?? 0;
+
+  const sentinelRef = useInfiniteScroll(
+    () => { if (hasNextPage && !isFetchingNextPage) fetchNextPage(); },
+    { enabled: !!hasNextPage && !isFetchingNextPage }
   );
 
   return (
     <div className="px-0 sm:px-4 md:px-6 py-4 sm:py-6">
       <div className="mb-6 px-3 sm:px-0">
         <h1 className="text-lg sm:text-xl font-medium mb-2">Search results for "{query}"</h1>
-        {data?.data?.total > 0 && (
-          <p className="text-xs sm:text-sm text-gray-400">{data.data.total} results</p>
+        {total > 0 && (
+          <p className="text-xs sm:text-sm text-gray-400">{total} results</p>
         )}
       </div>
 
@@ -45,16 +58,24 @@ const Search = () => {
             </div>
           ))}
         </div>
-      ) : data?.data?.data?.length === 0 ? (
+      ) : videos.length === 0 ? (
         <div className="text-center py-12 px-3">
           <p className="text-base sm:text-lg text-gray-400">No results found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
-          {data?.data?.data?.map((video) => (
-            <VideoCard key={video._id} video={video} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+            {videos.map((video) => (
+              <VideoCard key={video._id} video={video} />
+            ))}
+          </div>
+          <div ref={sentinelRef} className="h-4" />
+          {isFetchingNextPage && (
+            <div className="flex justify-center py-6">
+              <div className="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

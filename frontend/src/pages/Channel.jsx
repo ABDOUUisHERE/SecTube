@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useQuery, useInfiniteQuery, useMutation, useQueryClient } from 'react-query';
 import { userAPI, channelAPI } from '../services/api';
+import useInfiniteScroll from '../hooks/useInfiniteScroll';
 import VideoCard from '../components/VideoCard';
 import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
@@ -14,16 +15,34 @@ const Channel = () => {
   const { addToast } = useToastStore();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [page, setPage] = useState(1);
 
   const { data: channelData, isLoading: channelLoading } = useQuery(
     ['channel', username],
     () => channelAPI.getChannel(username)
   );
 
-  const { data: videosData, isLoading: videosLoading } = useQuery(
-    ['channel-videos', username, page],
-    () => userAPI.getUserVideos(username, { page, limit: 12 })
+  const {
+    data: videosData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: videosLoading,
+  } = useInfiniteQuery(
+    ['channel-videos', username],
+    ({ pageParam = 1 }) => userAPI.getUserVideos(username, { page: pageParam, limit: 12 }),
+    {
+      getNextPageParam: (lastPage) => {
+        const { page, pages } = lastPage.data;
+        return page < pages ? page + 1 : undefined;
+      },
+    }
+  );
+
+  const channelVideos = videosData?.pages?.flatMap(p => p.data.data) ?? [];
+
+  const videosSentinelRef = useInfiniteScroll(
+    () => { if (hasNextPage && !isFetchingNextPage) fetchNextPage(); },
+    { enabled: !!hasNextPage && !isFetchingNextPage }
   );
 
   const subscribeMutation = useMutation(
@@ -327,41 +346,25 @@ const Channel = () => {
                 </div>
               ))}
             </div>
-          ) : videosData?.data?.data?.length === 0 ? (
+          ) : channelVideos.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-base sm:text-lg text-gray-400">No videos yet</p>
             </div>
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-0 sm:gap-x-4 gap-y-8 -mx-3 sm:mx-0">
-                {videosData?.data?.data?.map((video) => (
-                  <VideoCard 
-                    key={video._id} 
-                    video={video} 
+                {channelVideos.map((video) => (
+                  <VideoCard
+                    key={video._id}
+                    video={video}
                     showActions={isOwnChannel}
                   />
                 ))}
               </div>
-
-              {videosData?.data?.pages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-8">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="px-4 py-2 bg-dark-800 hover:bg-dark-700 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Previous
-                  </button>
-                  <span className="text-sm text-gray-400">
-                    Page {page} of {videosData?.data?.pages}
-                  </span>
-                  <button
-                    onClick={() => setPage((p) => Math.min(videosData?.data?.pages, p + 1))}
-                    disabled={page === videosData?.data?.pages}
-                    className="px-4 py-2 bg-dark-800 hover:bg-dark-700 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                  </button>
+              <div ref={videosSentinelRef} className="h-4" />
+              {isFetchingNextPage && (
+                <div className="flex justify-center py-6">
+                  <div className="w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
                 </div>
               )}
             </>
