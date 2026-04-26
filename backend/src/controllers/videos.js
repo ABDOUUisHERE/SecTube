@@ -1,5 +1,6 @@
 import { validationResult } from 'express-validator';
 import { createNotification } from './notificationController.js';
+import { moderationService } from '../services/ai/moderation.service.js';
 import Video from '../models/Video.js';
 import Comment from '../models/Comment.js';
 import User from '../models/User.js';
@@ -75,6 +76,14 @@ export const uploadVideo = async (req, res, next) => {
       return res.status(400).json({
         success: false,
         message: 'Invalid format for tags or toolsUsed'
+      });
+    }
+
+    const compliance = await moderationService.checkVideoCompliance({ title, description, category });
+    if (!compliance.compliant) {
+      return res.status(400).json({
+        success: false,
+        message: `Video rejected: ${compliance.reason || 'content does not meet community guidelines'}`
       });
     }
 
@@ -511,6 +520,14 @@ export const addComment = async (req, res, next) => {
       return res.status(400).json({
         success: false,
         message: 'Comment content is required'
+      });
+    }
+
+    const moderation = await moderationService.moderateComment(content);
+    if (moderation.action === 'rejected') {
+      return res.status(400).json({
+        success: false,
+        message: `Comment rejected: ${moderation.reason || 'violates community guidelines'}`
       });
     }
 
