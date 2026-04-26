@@ -39,8 +39,13 @@ export const initSocket = (httpServer) => {
   ioInstance.on('connection', (socket) => {
     const userId = String(socket.user._id);
     onlineUsers.set(userId, socket.id);
+    socket.focusedConversation = null;
 
-    // Notify sender's other tabs / presence updates if needed
+    // Client tells us which conversation they have open (null = none)
+    socket.on('conversation:focus', (otherUserId) => {
+      socket.focusedConversation = otherUserId ? String(otherUserId) : null;
+    });
+
     socket.on('message:send', async ({ receiverId, content }, ack) => {
       try {
         if (!content?.trim() || String(receiverId) === userId) return;
@@ -59,15 +64,21 @@ export const initSocket = (httpServer) => {
         // Deliver to recipient if online
         emitToUser(String(receiverId), 'message:receive', populated);
 
-        // Notify recipient
-        createNotification({
-          recipient:   receiverId,
-          type:        'message',
-          actor:       { _id: socket.user._id, username: socket.user.username, displayName: socket.user.displayName, avatar: socket.user.avatar },
-          entityId:    message._id,
-          entityType:  'message',
-          entityTitle: content.trim().slice(0, 60),
-        });
+        // Skip notification if recipient currently has this conversation open
+        const recipientSocketId = onlineUsers.get(String(receiverId));
+        const recipientSocket = recipientSocketId ? ioInstance.sockets.sockets.get(recipientSocketId) : null;
+        const recipientFocused = recipientSocket?.focusedConversation === userId;
+
+        if (!recipientFocused) {
+          createNotification({
+            recipient:   receiverId,
+            type:        'message',
+            actor:       { _id: socket.user._id, username: socket.user.username, displayName: socket.user.displayName, avatar: socket.user.avatar },
+            entityId:    message._id,
+            entityType:  'message',
+            entityTitle: content.trim().slice(0, 60),
+          });
+        }
 
         // Confirm back to sender
         ack?.({ success: true, data: populated });

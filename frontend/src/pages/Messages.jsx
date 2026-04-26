@@ -15,7 +15,7 @@ const Messages = () => {
   const { user } = useAuthStore();
   const { setUnreadCount } = useMessageStore();
   const { addToast } = useToastStore();
-  const { sendMessage, setOnMessage } = useSocket();
+  const { sendMessage, setOnMessage, setFocusedConversation } = useSocket();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [conversations, setConversations] = useState([]);
@@ -49,6 +49,12 @@ const Messages = () => {
     const conv = conversations.find((c) => String(c.otherUser?._id) === String(activeUserId));
     if (conv) setActiveUser(conv.otherUser);
   }, [activeUserId, conversations]);
+
+  // Tell the server which conversation is currently open so it skips notifications for it
+  useEffect(() => {
+    setFocusedConversation(activeUserId);
+    return () => setFocusedConversation(null);
+  }, [activeUserId, setFocusedConversation]);
 
   useEffect(() => {
     if (!activeUserId) return;

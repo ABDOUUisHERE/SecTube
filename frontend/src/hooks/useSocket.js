@@ -24,8 +24,9 @@ const attachListeners = (socket, setUnreadCount, incrementNotif) => {
     onMessageHandler?.(message);
   });
 
-  socket.on('notification:receive', () => {
-    incrementNotif();
+  socket.on('notification:receive', (notif) => {
+    // notif.count is the grouped count; increment by the delta (1 for new, or just increment)
+    incrementNotif(notif?.count ?? 1);
   });
 };
 
@@ -72,5 +73,9 @@ export const useSocket = () => {
     socketInstance.emit('message:send', { receiverId, content }, ack);
   }, []);
 
-  return { sendMessage, setOnMessage };
+  const setFocusedConversation = useCallback((userId) => {
+    socketInstance?.emit('conversation:focus', userId ?? null);
+  }, []);
+
+  return { sendMessage, setOnMessage, setFocusedConversation };
 };

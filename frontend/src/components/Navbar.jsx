@@ -95,7 +95,7 @@ const Navbar = () => {
     if (!notif.read) {
       await notificationAPI.markRead(notif._id).catch(() => {});
       setNotifications((prev) => prev.map((n) => n._id === notif._id ? { ...n, read: true } : n));
-      setNotifCount(Math.max(0, notifCount - 1));
+      setNotifCount(Math.max(0, notifCount - (notif.count || 1)));
     }
     setShowNotifs(false);
     if (notif.type === 'subscribe') navigate(`/channel/${notif.actor.username}`);
@@ -121,7 +121,7 @@ const Navbar = () => {
     if (n.type === 'comment')   return <><span className="font-semibold text-white">{name}</span> commented on <span className="font-semibold text-white">{n.entityTitle}</span></>;
     if (n.type === 'reply')     return <><span className="font-semibold text-white">{name}</span> replied to your comment on <span className="font-semibold text-white">{n.entityTitle}</span></>;
     if (n.type === 'subscribe') return <><span className="font-semibold text-white">{name}</span> subscribed to your channel</>;
-    if (n.type === 'message')   return <><span className="font-semibold text-white">{name}</span> sent you a message</>;
+    if (n.type === 'message')   return <><span className="font-semibold text-white">{name}</span> sent you {n.count > 1 ? <><span className="font-semibold text-white">{n.count}</span> messages</> : 'a message'}</>;
     return name;
   };
 

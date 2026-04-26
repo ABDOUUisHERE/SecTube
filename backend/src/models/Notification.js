@@ -13,6 +13,7 @@ const notificationSchema = new mongoose.Schema({
   entityType:  { type: String, enum: ['video', 'comment', 'message'] },
   entityTitle: String,
   read:        { type: Boolean, default: false },
+  count:       { type: Number, default: 1 },
 }, { timestamps: true });
 
 notificationSchema.index({ recipient: 1, createdAt: -1 });
