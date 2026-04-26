@@ -3,6 +3,7 @@ import { useInfiniteQuery } from 'react-query';
 import { videoAPI } from '../services/api';
 import VideoCard from '../components/VideoCard';
 import VideoCardSkeleton from '../components/VideoCardSkeleton';
+import AIRecommendedRow from '../components/AIRecommendedRow';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
 
 const categories = [
@@ -44,6 +45,8 @@ const Home = () => {
 
   return (
     <div className="px-0 sm:px-4 md:px-6 py-4 sm:py-6">
+      <AIRecommendedRow />
+
       {/* Category chips */}
       <div className="mb-6 sm:mb-10 overflow-x-auto pb-3 sm:pb-4 scrollbar-hide">
         <div className="flex flex-nowrap gap-2 sm:gap-3 snap-x snap-mandatory pl-3 sm:pl-0">

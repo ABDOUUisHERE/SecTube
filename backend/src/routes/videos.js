@@ -14,6 +14,7 @@ import {
   likeComment,
   searchVideos,
   analyzeVideoMeta,
+  getRecommendations,
 } from '../controllers/videos.js';
 import { protect, authorize, optionalAuth } from '../middleware/auth.js';
 import { uploadMiddleware } from '../middleware/upload.js';
@@ -93,6 +94,7 @@ router.get('/', cacheMiddleware(30), getVideos);
  *         description: Search results
  */
 router.get('/search', searchVideos);
+router.get('/recommendations', optionalAuth, getRecommendations);
 router.post('/analyze-meta', protect, analyzeVideoMeta);
 
 /**

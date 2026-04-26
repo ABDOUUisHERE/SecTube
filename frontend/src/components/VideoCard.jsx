@@ -11,7 +11,7 @@ import Z_INDEX from '../config/zIndex';
 import { useDropdownPosition, getDropdownClasses } from '../hooks/useDropdownPosition';
 import sanitize from '../utils/sanitize';
 
-const VideoCard = ({ video, showActions = false }) => {
+const VideoCard = ({ video, showActions = false, compact = false }) => {
   const [showMenu, setShowActionsMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showVisibilityConfirm, setShowVisibilityConfirm] = useState(false);
@@ -133,23 +133,29 @@ const VideoCard = ({ video, showActions = false }) => {
         {/* Video details */}
         <div className="flex-1 min-w-0 pr-8 sm:pr-10">
           <Link to={`/video/${video._id}`}>
-            <h3 className="text-xs sm:text-sm font-medium text-white line-clamp-2 mb-0.5 leading-snug hover:text-primary-400 transition-colors">
+            <h3 className={`font-medium text-white line-clamp-2 mb-0.5 leading-snug hover:text-primary-400 transition-colors ${compact ? 'text-[11px]' : 'text-xs sm:text-sm'}`}>
               {sanitize(video.title)}
             </h3>
           </Link>
 
-          <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
-            <Link
-              to={`/channel/${video.uploader?.username}`}
-              className="hover:text-gray-400 truncate"
-            >
-              {sanitize(video.uploader?.displayName || video.uploader?.username)}
-            </Link>
-            <span>•</span>
-            <span className="whitespace-nowrap">{formatViews(video.views)} views</span>
-            <span>•</span>
-            <span className="whitespace-nowrap">{formatDistanceToNow(new Date(video.uploadedAt), { addSuffix: true })}</span>
-          </div>
+          {compact ? (
+            <div className="flex flex-col gap-0.5 text-[10px] text-gray-500">
+              <Link to={`/channel/${video.uploader?.username}`} className="hover:text-gray-400 truncate font-medium">
+                {sanitize(video.uploader?.displayName || video.uploader?.username)}
+              </Link>
+              <span className="whitespace-nowrap">{formatViews(video.views)} views · {formatDistanceToNow(new Date(video.uploadedAt), { addSuffix: true })}</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
+              <Link to={`/channel/${video.uploader?.username}`} className="hover:text-gray-400 truncate">
+                {sanitize(video.uploader?.displayName || video.uploader?.username)}
+              </Link>
+              <span>•</span>
+              <span className="whitespace-nowrap">{formatViews(video.views)} views</span>
+              <span>•</span>
+              <span className="whitespace-nowrap">{formatDistanceToNow(new Date(video.uploadedAt), { addSuffix: true })}</span>
+            </div>
+          )}
         </div>
 
         {/* Actions Menu */}

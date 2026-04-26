@@ -2,6 +2,7 @@ import { validationResult } from 'express-validator';
 import { createNotification } from './notificationController.js';
 import { moderationService } from '../services/ai/moderation.service.js';
 import { contentAnalysisService } from '../services/ai/contentAnalysis.service.js';
+import { recommendationService } from '../services/ai/recommendation.service.js';
 import Video from '../models/Video.js';
 import Comment from '../models/Comment.js';
 import User from '../models/User.js';
@@ -760,6 +761,21 @@ export const analyzeVideoMeta = async (req, res, next) => {
     }
 
     res.json({ success: true, data: analysis });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// AI: personalized video recommendations
+export const getRecommendations = async (req, res, next) => {
+  try {
+    const userId = req.user?.id || null;
+    const { limit = 12, excludeVideoId } = req.query;
+    const result = await recommendationService.getRecommendations(userId, {
+      limit: Math.min(parseInt(limit, 10) || 12, 20),
+      excludeVideoId,
+    });
+    res.json({ success: true, data: result });
   } catch (error) {
     next(error);
   }

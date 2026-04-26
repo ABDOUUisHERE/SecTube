@@ -61,7 +61,7 @@ const Settings = () => {
       });
     }, { threshold: 0.3, rootMargin: "-100px 0px -50% 0px" });
 
-    const sections = ['identity', 'expertise', 'social', 'security', 'upload', 'streamer'];
+    const sections = ['identity', 'expertise', 'social', 'preferences', 'security', 'upload', 'streamer'];
     sections.forEach(id => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
@@ -102,6 +102,9 @@ const Settings = () => {
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiRecommendedHidden, setAiRecommendedHidden] = useState(
+    () => localStorage.getItem('ai_recommended_hidden') === 'true'
+  );
 
   const [upgradeData, setUpgradeData] = useState({
     channelName: user?.channelName || '',
@@ -438,6 +441,15 @@ const Settings = () => {
                 <FaLink size={12} className="sm:w-[14px] sm:h-[14px]" /> Social Links
               </a>
               <a
+                href="#preferences"
+                onClick={() => { setActiveSection('preferences'); setSidebarCollapsed(true); }}
+                className={`flex items-center gap-2 sm:gap-3 px-2 sm:px-4 py-2 sm:py-2.5 rounded-md transition text-xs sm:text-sm font-medium ${
+                  activeSection === 'preferences' ? 'bg-dark-900 text-white' : 'text-gray-400 hover:text-white hover:bg-dark-900'
+                }`}
+              >
+                <BsStars size={12} className="sm:w-[14px] sm:h-[14px]" /> Preferences
+              </a>
+              <a
                 href="#security"
                 onClick={() => {
                   setActiveSection('security');
@@ -601,6 +613,35 @@ const Settings = () => {
               </Button>
             </div>
           </form>
+
+          {/* Preferences */}
+          <div id="preferences" className="scroll-mt-24 pt-8 sm:pt-12 border-t border-dark-800">
+            <div className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
+              <div className="w-0.5 sm:w-1 h-6 sm:h-8 bg-primary-500 rounded-full"></div>
+              <h3 className="text-sm sm:text-base md:text-lg font-bold text-white uppercase tracking-widest">Preferences</h3>
+            </div>
+            <div className="bg-dark-900 border border-dark-800 rounded-md p-4 sm:p-6 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium text-white">AI Recommended section</p>
+                <p className="text-xs text-gray-500 mt-0.5">Show the AI-powered recommendations row on the home page.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !aiRecommendedHidden;
+                  setAiRecommendedHidden(next);
+                  localStorage.setItem('ai_recommended_hidden', String(next));
+                }}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 transition-colors duration-200 focus:outline-none ${
+                  aiRecommendedHidden ? 'bg-dark-700 border-dark-600' : 'bg-primary-600 border-primary-500'
+                }`}
+              >
+                <span className={`inline-block h-4 w-4 mt-0.5 rounded-full bg-white shadow transition-transform duration-200 ${
+                  aiRecommendedHidden ? 'translate-x-0.5' : 'translate-x-5'
+                }`} />
+              </button>
+            </div>
+          </div>
 
           {/* Security (2FA & Password) */}
           <div id="security" className="scroll-mt-24 space-y-4 sm:space-y-8">
