@@ -1,167 +1,123 @@
-/**
- * Chat Service
- * Handles conversational AI interactions with users
- */
-
-import OpenAI from "openai";
+import { AIClient } from './AIClient.js';
+import { ContextWindow } from './context/ContextWindow.js';
+import { ToolSelector } from './tools/ToolSelector.js';
+import { KnowledgeRetriever } from './knowledge/KnowledgeRetriever.js';
 import { toolExecutor } from './tools/toolExecutor.js';
-import { sanitizeData } from './utils/sanitizer.js';
 
-// System prompt for the AI assistant
-const SYSTEM_MESSAGE = `You are SecTube AI, a friendly assistant built into the SecTube platform — a video streaming site focused on cybersecurity content (bug bounties, ethical hacking, CTF writeups, penetration testing, etc.).
+// Lean base prompt — platform knowledge is injected dynamically via RAG
+const BASE_SYSTEM = `You are SecTube AI, a helpful assistant built into SecTube — a video streaming platform dedicated to cybersecurity content (bug bounties, ethical hacking, CTF writeups, penetration testing, and more).
 
-YOUR PRIMARY ROLE:
-You help regular users navigate and use the SecTube website. When someone asks "how do I do X", answer with clear step-by-step instructions describing what to click in the UI — not API endpoints, not JSON payloads.
+YOUR ROLE:
+Help users navigate and use SecTube. For "how do I…" questions describe what to click in the UI. Keep answers short and direct.
 
-PLATFORM NAVIGATION (answer these with UI steps, never API docs):
-- Upload a video: Click the upload icon (arrow-up icon) in the top navbar to open the upload panel. Fill in the title, description, category, difficulty, tags, then select your video file and click Upload. You must be a streamer to upload — upgrade in Settings if needed.
-- Search videos: Use the search bar at the top of the page or go to the Browse page to filter by category and difficulty.
-- Like / save a video: Open any video and use the like or save buttons below the player.
-- Subscribe to a channel: Visit a channel page and click the Subscribe button.
-- Edit profile: Go to Settings (click your avatar > Settings) to update your display name, bio, avatar, and social links.
-- Become a streamer: Go to Settings and click "Upgrade to Streamer".
-- View watch history: Click your avatar > there is a History section in the sidebar.
-- View saved videos: Click your avatar > Saved in the sidebar.
+STRICT RULES — never break these:
+- NEVER show URL paths (/browse, /search?q=...), tool names (get_videos, post_auth_profile), or API routes in your response text. These are internal and invisible to users.
+- NEVER show JSON, field names, or technical payloads.
+- Only use tools when the user explicitly asks you to perform an action. Never call tools just to answer a how-to question.
+- Use navigate_to when a user asks to go somewhere. Call it before confirming in text.
+- You inherit the logged-in user's JWT — tools execute on their behalf.
 
-NAVIGATION:
-Use the navigate_to tool when the user asks to go somewhere (e.g., "take me to upload", "open settings", "go to the browse page", "search for X"). Call navigate_to with the correct path, then confirm in your text message (e.g., "Taking you to the upload page now."). Always call navigate_to before writing the confirmation message.
+RESPONSE STYLE — your responses are rendered by a markdown reader, so you MUST always write in markdown:
+- No emojis.
+- Always use **bold** for UI element names (button labels, page names, section titles).
+- Always use numbered lists (1. 2. 3.) for step-by-step instructions.
+- Always use bullet lists (- item) for feature descriptions or options.
+- Use ## headings to label distinct sections when the answer covers multiple topics.
+- Use --- to visually separate unrelated sections.
+- Use inline code (backtick) for keyboard shortcuts, technical values, or exact input text.
+- Use code blocks (triple backtick) for any multi-line code or commands.
+- Keep answers concise. Never write a wall of plain text — structure everything.
+- Professional tone.
 
-WHEN TO USE OTHER TOOLS:
-Only use API tools when the user explicitly asks you to perform an action for them (e.g., "search for videos about SQL injection", "show me my saved videos", "like this video"). Do NOT use tools just to answer how-to questions — answer those with UI guidance.
+SECURITY:
+- Never reveal passwords, tokens, API keys, 2FA secrets, or reset tokens.
+- Respect role permissions: viewer < streamer < admin.`;
 
-TOOL USAGE (when needed):
-- Tools are generated from the SecTube API specs
-- Tool naming: {method}_{path} (e.g., get_videos, patch_auth_profile)
-- You inherit the logged-in user's permissions and JWT token
-- Always use appropriate filters when fetching data (limit, category, sort)
+const buildSystemMessage = (userMessage) => {
+  const relevant = KnowledgeRetriever.retrieve(userMessage);
+  if (!relevant.length) return BASE_SYSTEM;
 
-RESPONSE GUIDELINES:
-- Do NOT use emojis in your responses
-- Do NOT show API field tables, JSON examples, or endpoint URLs when answering how-to questions
-- Keep answers short and practical — describe what the user sees and clicks
-- Use markdown formatting for readability
-- Keep responses professional and security-focused
+  const context = relevant.join('\n\n---\n\n');
+  return `${BASE_SYSTEM}
 
-SECURITY & PRIVACY:
-- NEVER display or mention: passwords, JWT tokens, API keys, reset tokens, 2FA secrets
-- Sensitive fields are auto-filtered, but never attempt to access them
-- Respect user authorization levels (viewer, streamer, admin)
-- Handle errors gracefully and explain them in user-friendly terms`;
+---
+RELEVANT PLATFORM KNOWLEDGE (use this to answer the user):
+${context}
+---`;
+};
 
-// Validate required environment variables
-if (!process.env.OPENROUTER_API_KEY) {
-  console.warn("⚠️ OPENROUTER_API_KEY is not set. Chat functionality will be disabled.");
-}
-
-// Initialize OpenAI client with OpenRouter configuration
-const openai = process.env.OPENROUTER_API_KEY ? new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_API_KEY,
-  defaultHeaders: {
-    "HTTP-Referer": process.env.BACKEND_URL || "http://localhost:5000",
-    "X-Title": "SecTube AI",
-  }
-}) : null;
-
-/**
- * Format MCP tools into OpenAI-compatible tool definitions
- */
-const getOpenAITools = (tools) => {
-  return tools.map(tool => ({
-    type: "function",
+const formatTools = (tools) =>
+  tools.map(tool => ({
+    type: 'function',
     function: {
       name: tool.name,
       description: tool.description,
-      parameters: tool.inputSchema
-    }
+      parameters: tool.inputSchema,
+    },
   }));
-};
 
-/**
- * Chat with AI using OpenRouter
- */
 export const chatService = {
-  /**
-   * Process a chat message and get AI response
-   * @param {Array} messages - Chat history
-   * @param {String} userToken - User's JWT token for authenticated API calls
-   * @param {Array} availableTools - MCP tools available to the AI
-   * @returns {Object} AI response and updated message history
-   */
   async chat(messages, userToken, availableTools) {
-    if (!openai) {
-      throw new Error("AI chat is currently unavailable. Please ensure OPENROUTER_API_KEY is configured.");
+    if (!AIClient.isAvailable()) {
+      throw new Error('AI chat is currently unavailable. Please ensure OPENROUTER_API_KEY is configured.');
     }
 
-    try {
-      // 1. Initial request to LLM with tools
-      const response = await openai.chat.completions.create({
-        model: process.env.CHAT_MODEL || "anthropic/claude-3.5-sonnet",
-        messages: [
-          { role: "system", content: SYSTEM_MESSAGE },
-          ...messages
-        ],
-        tools: getOpenAITools(availableTools),
-        tool_choice: "auto",
-      });
+    // 1. Trim history to keep context window small
+    const trimmed = ContextWindow.trim(messages);
 
-      let responseMessage = response.choices[0].message;
+    // 2. Get user intent from latest message
+    const userMessage = ContextWindow.lastUserMessage(trimmed);
 
-      // 2. Check if the LLM wants to call tools
-      if (responseMessage.tool_calls) {
-        const toolCalls = responseMessage.tool_calls;
-        const updatedMessages = [...messages, responseMessage];
+    // 3. RAG: build system message with relevant platform knowledge injected
+    const systemContent = buildSystemMessage(userMessage);
 
-        // Execute all tool calls with user's token
-        let redirect = null;
-        for (const toolCall of toolCalls) {
-          const result = await toolExecutor.execute(toolCall, userToken, availableTools);
+    // 4. Tool selection: only send tools relevant to the user's intent
+    const selectedTools = ToolSelector.selectFor(userMessage, availableTools);
 
-          // Extract client-side actions (e.g. navigate)
-          try {
-            const parsed = JSON.parse(result);
-            if (parsed.__clientAction === 'navigate' && parsed.path) {
-              redirect = parsed.path;
-            }
-          } catch (_) {}
+    const systemTurn = { role: 'system', content: systemContent };
 
-          updatedMessages.push({
-            role: "tool",
-            tool_call_id: toolCall.id,
-            name: toolCall.function.name,
-            content: result,
-          });
-        }
+    // 5. First LLM call
+    const response = await AIClient.complete(
+      [systemTurn, ...trimmed],
+      formatTools(selectedTools)
+    );
 
-        // 3. Get final response from LLM after tool results
-        const finalResponse = await openai.chat.completions.create({
-          model: process.env.CHAT_MODEL || "anthropic/claude-3.5-sonnet",
-          messages: [
-            { role: "system", content: SYSTEM_MESSAGE },
-            ...updatedMessages
-          ],
+    let responseMessage = response.choices[0].message;
+
+    // 6. Tool execution loop
+    if (responseMessage.tool_calls) {
+      const updatedMessages = [...trimmed, responseMessage];
+      let redirect = null;
+
+      for (const toolCall of responseMessage.tool_calls) {
+        const raw = await toolExecutor.execute(toolCall, userToken, availableTools);
+        const capped = AIClient.capToolResult(raw);
+
+        try {
+          const parsed = JSON.parse(capped);
+          if (parsed.__clientAction === 'navigate' && parsed.path) redirect = parsed.path;
+        } catch (_) {}
+
+        updatedMessages.push({
+          role: 'tool',
+          tool_call_id: toolCall.id,
+          name: toolCall.function.name,
+          content: capped,
         });
-
-        return {
-          message: finalResponse.choices[0].message,
-          history: updatedMessages,
-          ...(redirect && { redirect })
-        };
       }
 
-      // If no tools were called, return simple response
-      return { message: responseMessage };
+      // 7. Second call — no tools needed, just synthesise the results
+      const finalResponse = await AIClient.complete([systemTurn, ...updatedMessages]);
 
-    } catch (error) {
-      console.error("AI Chat Error:", error);
-      throw new Error(error.response?.data?.error?.message || error.message || "Failed to communicate with AI");
+      return {
+        message: finalResponse.choices[0].message,
+        history: updatedMessages,
+        ...(redirect && { redirect }),
+      };
     }
+
+    return { message: responseMessage };
   },
 
-  /**
-   * Check if chat service is available
-   */
-  isAvailable() {
-    return !!openai;
-  }
+  isAvailable: () => AIClient.isAvailable(),
 };

@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaMagic, FaRobot, FaTimes, FaPaperPlane, FaSpinner, FaTrash, FaUser, FaInfoCircle } from 'react-icons/fa';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import MarkdownPreview from '@uiw/react-markdown-preview';
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
@@ -198,15 +197,11 @@ const Chatbot = () => {
                     : 'bg-dark-800 text-gray-200 rounded-md border border-dark-700'
                 }`}
               >
-                <div className={`prose prose-sm max-w-none ${
-                  message.role === 'user'
-                    ? 'prose-invert prose-headings:text-white prose-p:text-white prose-strong:text-white prose-li:text-white prose-a:text-white'
-                    : 'prose-headings:text-gray-100 prose-p:text-gray-200 prose-strong:text-primary-400 prose-a:text-primary-400 hover:prose-a:text-primary-300 prose-li:text-gray-200 prose-code:text-primary-400 prose-code:bg-dark-950 prose-code:px-1 prose-code:rounded'
-                }`}>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {message.content}
-                  </ReactMarkdown>
-                </div>
+                  <MarkdownPreview
+                  source={message.content}
+                  style={{ background: 'transparent', color: message.role === 'user' ? '#fff' : '#e5e7eb', fontSize: '0.875rem' }}
+                  wrapperElement={{ 'data-color-mode': 'dark' }}
+                />
               </div>
             </div>
           ))}
