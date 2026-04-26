@@ -4,7 +4,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { authAPI, videoAPI } from '../services/api';
 import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
-import { FaSave, FaVideo, FaUser, FaTwitter, FaGithub, FaLinkedin, FaGlobe, FaBug, FaFingerprint, FaLink, FaUserEdit, FaCheck, FaShieldAlt, FaDiscord, FaYoutube, FaUpload, FaImage, FaList, FaTags, FaTools, FaEye, FaFileUpload, FaMobileAlt, FaKey, FaChevronRight, FaTimes, FaEyeSlash, FaLock, FaEnvelope } from 'react-icons/fa';
+import { FaSave, FaVideo, FaUser, FaTwitter, FaGithub, FaLinkedin, FaGlobe, FaBug, FaFingerprint, FaLink, FaUserEdit, FaCheck, FaShieldAlt, FaDiscord, FaYoutube, FaUpload, FaImage, FaList, FaTags, FaTools, FaEye, FaFileUpload, FaMobileAlt, FaKey, FaChevronRight, FaTimes, FaEyeSlash, FaLock, FaEnvelope, FaSpinner } from 'react-icons/fa';
+import { BsStars } from 'react-icons/bs';
 import { SiTryhackme } from 'react-icons/si';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { getAvatarUrl } from '../config/constants';
@@ -100,6 +101,7 @@ const Settings = () => {
   const [videoFile, setVideoFile] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const [upgradeData, setUpgradeData] = useState({
     channelName: user?.channelName || '',
@@ -297,6 +299,31 @@ const Settings = () => {
     data.append('specialties', JSON.stringify(formData.specialties));
     if (avatarFile) data.append('avatar', avatarFile);
     updateMutation.mutate(data);
+  };
+
+  const handleGenerateMeta = async () => {
+    if (!uploadData.title && !uploadData.description) return;
+    setIsAnalyzing(true);
+    try {
+      const res = await videoAPI.analyzeVideoMeta({
+        title: uploadData.title,
+        description: uploadData.description,
+        category: uploadData.category,
+      });
+      const { tags, toolsUsed, suggestedDifficulty, suggestedCategory } = res.data.data;
+      setUploadData(prev => ({
+        ...prev,
+        ...(tags?.length && { tags: tags.join(', ') }),
+        ...(toolsUsed?.length && { toolsUsed: toolsUsed.join(', ') }),
+        ...(suggestedDifficulty && { difficulty: suggestedDifficulty }),
+        ...(suggestedCategory && { category: suggestedCategory }),
+      }));
+      addToast({ type: 'success', message: 'Metadata generated successfully' });
+    } catch {
+      addToast({ type: 'error', message: 'Failed to generate metadata' });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleUploadSubmit = async (e) => {
@@ -829,6 +856,20 @@ const Settings = () => {
                     disabled={uploadMutation.isLoading}
                     showCount
                   />
+
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleGenerateMeta}
+                      disabled={isAnalyzing || (!uploadData.title && !uploadData.description) || uploadMutation.isLoading}
+                      className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-md border border-primary-500/40 text-primary-400 hover:bg-primary-500/10 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {isAnalyzing
+                        ? <><FaSpinner size={11} className="animate-spin" /> Generating...</>
+                        : <><BsStars size={11} /> Generate with AI</>
+                      }
+                    </button>
+                  </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                     <CustomSelect

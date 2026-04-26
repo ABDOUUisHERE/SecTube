@@ -65,6 +65,7 @@ export const videoAPI = {
   getCommentReplies: (commentId) => api.get(`/videos/comments/${commentId}/replies`),
   likeComment: (commentId) => api.post(`/videos/comments/${commentId}/like`),
   searchVideos: (params) => api.get('/videos/search', { params }),
+  analyzeVideoMeta: (data) => api.post('/videos/analyze-meta', data),
 };
 
 // User API

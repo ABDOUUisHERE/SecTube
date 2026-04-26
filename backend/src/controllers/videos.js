@@ -1,6 +1,7 @@
 import { validationResult } from 'express-validator';
 import { createNotification } from './notificationController.js';
 import { moderationService } from '../services/ai/moderation.service.js';
+import { contentAnalysisService } from '../services/ai/contentAnalysis.service.js';
 import Video from '../models/Video.js';
 import Comment from '../models/Comment.js';
 import User from '../models/User.js';
@@ -738,6 +739,27 @@ export const searchVideos = async (req, res, next) => {
       pages: Math.ceil(total / limit),
       data: videos
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// AI: analyze title + description and return suggestions for the upload form
+export const analyzeVideoMeta = async (req, res, next) => {
+  try {
+    const { title = '', description = '', category = '' } = req.body;
+
+    if (!title && !description) {
+      return res.status(400).json({ success: false, message: 'title or description is required' });
+    }
+
+    const analysis = await contentAnalysisService.analyzeMeta({ title, description, category });
+
+    if (!analysis) {
+      return res.status(503).json({ success: false, message: 'Content analysis unavailable' });
+    }
+
+    res.json({ success: true, data: analysis });
   } catch (error) {
     next(error);
   }
