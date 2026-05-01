@@ -73,7 +73,17 @@ const GoLive = () => {
   };
 
   const copy = (text, label) => {
-    navigator.clipboard.writeText(text).then(() => addToast({ type: 'success', message: `${label} copied!` }));
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).then(() => addToast({ type: 'success', message: `${label} copied!` }));
+    } else {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      addToast({ type: 'success', message: `${label} copied!` });
+    }
   };
 
   const handleCreate = async (e) => {
