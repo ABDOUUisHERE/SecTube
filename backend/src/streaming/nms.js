@@ -118,11 +118,6 @@ export const initNMS = async () => {
       ping: 30,
       ping_timeout: 60,
     },
-    http: {
-      port: parseInt(process.env.NMS_HTTP_PORT) || 8888,
-      mediaroot: STREAMS_DIR,
-      allow_origin: '*',
-    },
   });
 
   // prePublish: validate key, update DB, store stream doc for postPublish
