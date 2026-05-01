@@ -19,6 +19,9 @@ backend/uploads/
 backend/videos/
 backend/thumbnails/
 
+# Live streaming runtime files (HLS segments + thumbnails)
+backend/streams/
+
 # Avatars - ignore all except default
 backend/avatars/*
 !backend/avatars/default-avatar.svg

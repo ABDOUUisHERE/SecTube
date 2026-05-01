@@ -2,11 +2,19 @@ import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import User from './models/User.js';
 import Message from './models/Message.js';
+import Stream from './models/Stream.js';
 import { createNotification } from './controllers/notificationController.js';
 
 // userId -> socketId
 const onlineUsers = new Map();
+// streamId -> last 100 chat messages (in-memory replay buffer)
+const chatHistory = new Map();
+const CHAT_HISTORY_LIMIT = 100;
 let ioInstance = null;
+
+export const getIO = () => ioInstance;
+
+export const clearChatHistory = (streamId) => chatHistory.delete(String(streamId));
 
 export const emitToUser = (userId, event, data) => {
   const socketId = onlineUsers.get(String(userId));
@@ -21,7 +29,6 @@ export const initSocket = (httpServer) => {
     },
   });
 
-  // Auth middleware
   ioInstance.use(async (socket, next) => {
     const token = socket.handshake.auth?.token;
     if (!token) return next(new Error('Unauthorized'));
@@ -41,7 +48,8 @@ export const initSocket = (httpServer) => {
     onlineUsers.set(userId, socket.id);
     socket.focusedConversation = null;
 
-    // Client tells us which conversation they have open (null = none)
+    // ─── Messaging ────────────────────────────────────────────────────────────
+
     socket.on('conversation:focus', (otherUserId) => {
       socket.focusedConversation = otherUserId ? String(otherUserId) : null;
     });
@@ -61,10 +69,8 @@ export const initSocket = (httpServer) => {
           { path: 'receiver', select: 'username displayName avatar' },
         ]);
 
-        // Deliver to recipient if online
         emitToUser(String(receiverId), 'message:receive', populated);
 
-        // Skip notification if recipient currently has this conversation open
         const recipientSocketId = onlineUsers.get(String(receiverId));
         const recipientSocket = recipientSocketId ? ioInstance.sockets.sockets.get(recipientSocketId) : null;
         const recipientFocused = recipientSocket?.focusedConversation === userId;
@@ -80,15 +86,77 @@ export const initSocket = (httpServer) => {
           });
         }
 
-        // Confirm back to sender
         ack?.({ success: true, data: populated });
       } catch (err) {
         ack?.({ success: false, message: err.message });
       }
     });
 
-    socket.on('disconnect', () => {
+    // ─── Live Viewers ─────────────────────────────────────────────────────────
+
+    socket.on('viewer:join', async ({ streamId }) => {
+      socket.join(`stream:${streamId}`);
+      socket.watchingStream = streamId;
+
+      // Replay buffered chat messages to the joining viewer
+      const history = chatHistory.get(String(streamId));
+      if (history?.length) socket.emit('chat:history', history);
+
+      const updated = await Stream.findByIdAndUpdate(
+        streamId,
+        { $inc: { viewerCount: 1 } },
+        { new: true }
+      ).catch(() => null);
+      if (updated && updated.viewerCount > updated.peakViewers) {
+        await Stream.findByIdAndUpdate(streamId, { peakViewers: updated.viewerCount });
+      }
+      ioInstance.to(`stream:${streamId}`).emit('viewer:count', { count: updated?.viewerCount ?? 0 });
+    });
+
+    socket.on('viewer:leave', async ({ streamId }) => {
+      socket.leave(`stream:${streamId}`);
+      socket.watchingStream = null;
+      const updated = await Stream.findByIdAndUpdate(
+        streamId,
+        [{ $set: { viewerCount: { $max: [{ $subtract: ['$viewerCount', 1] }, 0] } } }],
+        { new: true }
+      ).catch(() => null);
+      ioInstance.to(`stream:${streamId}`).emit('viewer:count', { count: updated?.viewerCount ?? 0 });
+    });
+
+    // ─── Live Chat ────────────────────────────────────────────────────────────
+
+    socket.on('chat:message', ({ streamId, message }) => {
+      if (!message?.trim()) return;
+      const msg = {
+        userId:      String(socket.user._id),
+        username:    socket.user.username,
+        displayName: socket.user.displayName,
+        avatar:      socket.user.avatar,
+        message:     message.trim().slice(0, 300),
+        ts:          Date.now(),
+      };
+      // Buffer for replay
+      if (!chatHistory.has(String(streamId))) chatHistory.set(String(streamId), []);
+      const buf = chatHistory.get(String(streamId));
+      buf.push(msg);
+      if (buf.length > CHAT_HISTORY_LIMIT) buf.shift();
+
+      ioInstance.to(`stream:${streamId}`).emit('chat:message', msg);
+    });
+
+    socket.on('disconnect', async () => {
       onlineUsers.delete(userId);
+      if (socket.watchingStream) {
+        const updated = await Stream.findByIdAndUpdate(
+          socket.watchingStream,
+          [{ $set: { viewerCount: { $max: [{ $subtract: ['$viewerCount', 1] }, 0] } } }],
+          { new: true }
+        ).catch(() => null);
+        if (updated) {
+          ioInstance.to(`stream:${socket.watchingStream}`).emit('viewer:count', { count: updated.viewerCount });
+        }
+      }
     });
   });
 

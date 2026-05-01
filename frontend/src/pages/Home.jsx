@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { useInfiniteQuery } from 'react-query';
-import { videoAPI } from '../services/api';
+import { useInfiniteQuery, useQuery } from 'react-query';
+import { videoAPI, streamAPI } from '../services/api';
 import VideoCard from '../components/VideoCard';
 import VideoCardSkeleton from '../components/VideoCardSkeleton';
 import AIRecommendedRow from '../components/AIRecommendedRow';
+import LiveCard from '../components/LiveCard';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
 
 const categories = [
@@ -19,6 +20,12 @@ const categories = [
 
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState('All');
+
+  const { data: liveData } = useQuery(
+    'live-streams',
+    () => streamAPI.getLive(),
+    { staleTime: 30 * 1000, refetchInterval: 30 * 1000 }
+  );
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery(
     ['home-videos', selectedCategory],
@@ -37,6 +44,13 @@ const Home = () => {
   );
 
   const videos = data?.pages?.flatMap(p => p.data.data) ?? [];
+  const liveStreams = liveData?.data?.data ?? [];
+
+  // Live streams first, then videos — all in one flat list
+  const mixedItems = [
+    ...liveStreams.map((s) => ({ type: 'stream', data: s })),
+    ...videos.map((v) => ({ type: 'video', data: v })),
+  ];
 
   const sentinelRef = useInfiniteScroll(
     () => { if (hasNextPage && !isFetchingNextPage) fetchNextPage(); },
@@ -45,6 +59,7 @@ const Home = () => {
 
   return (
     <div className="px-0 sm:px-4 md:px-6 py-4 sm:py-6">
+
       <AIRecommendedRow />
 
       {/* Category chips */}
@@ -79,7 +94,7 @@ const Home = () => {
         }
       `}</style>
 
-      {/* Videos Grid */}
+      {/* Mixed grid: live streams first, then videos */}
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-0 sm:gap-x-4 gap-y-6 sm:gap-y-8">
           {[...Array(8)].map((_, i) => (
@@ -89,9 +104,11 @@ const Home = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-0 sm:gap-x-4 gap-y-6 sm:gap-y-8">
-            {videos.map((video) => (
-              <VideoCard key={video._id} video={video} />
-            ))}
+            {mixedItems.map((item) =>
+              item.type === 'stream'
+                ? <LiveCard key={`s-${item.data._id}`} stream={item.data} />
+                : <VideoCard key={`v-${item.data._id}`} video={item.data} />
+            )}
             {isFetchingNextPage && [...Array(4)].map((_, i) => <VideoCardSkeleton key={`sk-${i}`} />)}
           </div>
           <div ref={sentinelRef} className="h-4" />

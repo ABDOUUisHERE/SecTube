@@ -79,3 +79,12 @@ export const useSocket = () => {
 
   return { sendMessage, setOnMessage, setFocusedConversation };
 };
+
+// ─── Live Streaming helpers (used outside the hook) ──────────────────────────
+export const streamSocket = {
+  joinViewer:   (streamId) => socketInstance?.emit('viewer:join', { streamId }),
+  leaveViewer:  (streamId) => socketInstance?.emit('viewer:leave', { streamId }),
+  sendChat:     (streamId, message) => socketInstance?.emit('chat:message', { streamId, message }),
+  on: (event, handler) => { socketInstance?.on(event, handler); },
+  off: (event, handler) => { socketInstance?.off(event, handler); },
+};

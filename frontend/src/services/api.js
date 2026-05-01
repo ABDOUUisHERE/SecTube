@@ -76,6 +76,7 @@ export const userAPI = {
   subscribe: (userId) => api.post(`/users/${userId}/subscribe`),
   unsubscribe: (userId) => api.delete(`/users/${userId}/unsubscribe`),
   getSubscriptions: () => api.get('/users/me/subscriptions'),
+  getFollowingStreamers: () => api.get('/users/me/following-streamers'),
   getSubscriptionFeed: (params) => api.get('/users/me/subscription-feed', { params }),
   getWatchHistory: (params) => api.get('/users/me/history', { params }),
   clearWatchHistory: () => api.delete('/users/me/history'),
@@ -117,6 +118,18 @@ export const messageAPI = {
   getThread: (userId, params) => api.get(`/messages/${userId}`, { params }),
   markRead: (userId) => api.put(`/messages/${userId}/read`),
   getUnreadCount: () => api.get('/messages/unread-count'),
+};
+
+// Stream API
+export const streamAPI = {
+  create:           (data) => api.post('/streams', data),
+  getLive:          () => api.get('/streams/live'),
+  getFollowingLive: () => api.get('/streams/following'),
+  getMine:          () => api.get('/streams/mine'),
+  getStream:        (id) => api.get(`/streams/${id}`),
+  update:           (id, data) => api.put(`/streams/${id}`, data),
+  end:              (id) => api.put(`/streams/${id}/end`),
+  regenerateKey:    (id) => api.put(`/streams/${id}/regenerate-key`),
 };
 
 // Notification API
