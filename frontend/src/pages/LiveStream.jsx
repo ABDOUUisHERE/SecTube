@@ -119,7 +119,6 @@ const LiveStream = () => {
       clearTimeout(t);
       if (playerRef.current) { playerRef.current.dispose(); playerRef.current = null; }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stream?._id, stream?.status]);
 
   const sendChat = useCallback((e) => {
