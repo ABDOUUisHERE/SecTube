@@ -8,12 +8,7 @@ import { streamSocket } from '../hooks/useSocket';
 import useToastStore from '../store/toastStore';
 import CustomSelect from '../components/CustomSelect';
 
-const RTMP_SERVER = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api')
-  .replace('/api', '')
-  .replace('http', 'rtmp')
-  .replace('https', 'rtmps')
-  .replace(/:\d+$/, '')
-  + ':1935/live';
+const RTMP_SERVER = `rtmp://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:1935/live`;
 
 const categories = [
   'Web Application Security', 'Network Security', 'Bug Bounty', 'Penetration Testing',
