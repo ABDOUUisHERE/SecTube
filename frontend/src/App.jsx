@@ -28,6 +28,10 @@ import Subscriptions from './pages/Subscriptions';
 import Analytics from './pages/Analytics';
 import Admin from './pages/Admin';
 import Messages from './pages/Messages';
+import GoLive from './pages/GoLive';
+import LiveStream from './pages/LiveStream';
+import LiveStreams from './pages/LiveStreams';
+import RightPanel from './components/RightPanel';
 import ProtectedRoute from './components/ProtectedRoute';
 import { FaTimes } from 'react-icons/fa';
 import useAuthStore from './store/authStore';
@@ -109,7 +113,8 @@ function App() {
       {!isAuthPage && <Sidebar />}
       <Toast />
       <Chatbot />
-      <main className={isAuthPage ? 'w-full min-h-screen' : ''}>
+      <div className={isAuthPage ? 'w-full min-h-screen' : 'flex'}>
+        <main className="flex-1 min-w-0">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/browse" element={<Browse />} />
@@ -187,8 +192,24 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/streams" element={<LiveStreams />} />
+          <Route path="/live/:streamId" element={<LiveStream />} />
+          <Route
+            path="/go-live"
+            element={
+              <ProtectedRoute requireStreamer>
+                <GoLive />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
-      </main>
+        </main>
+        {!isAuthPage && isAuthenticated && location.pathname === '/streams' && (
+          <aside className="hidden 2xl:flex flex-col w-56 flex-shrink-0 sticky top-14 self-start h-[calc(100vh-56px)] border-l border-dark-800 bg-dark-900 overflow-hidden">
+            <RightPanel />
+          </aside>
+        )}
+      </div>
     </div>
   );
 }

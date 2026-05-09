@@ -5,6 +5,7 @@ import {
   subscribe,
   unsubscribe,
   getSubscriptions,
+  getFollowingStreamers,
   getSubscriptionFeed,
   getWatchHistory,
   clearWatchHistory,
@@ -54,6 +55,7 @@ router.get('/:username', optionalAuth, getUser);
  *         description: List of subscriptions
  */
 router.get('/me/subscriptions', protect, getSubscriptions);
+router.get('/me/following-streamers', protect, getFollowingStreamers);
 
 /**
  * @swagger

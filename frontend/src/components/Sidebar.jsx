@@ -1,9 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useQuery } from 'react-query';
 import { FaHome, FaFire, FaHistory, FaBookmark, FaVideo, FaBell, FaChartBar } from 'react-icons/fa';
 import { BsMoonFill, BsSunFill } from 'react-icons/bs';
+import { IoRadioOutline } from 'react-icons/io5';
 import useAuthStore from '../store/authStore';
 import useSidebarStore from '../store/sidebarStore';
 import useThemeStore from '../store/themeStore';
+import { streamAPI } from '../services/api';
 import Z_INDEX from '../config/zIndex';
 
 const Sidebar = () => {
@@ -12,12 +15,20 @@ const Sidebar = () => {
   const { isOpen, closeSidebar } = useSidebarStore();
   const { theme, toggleTheme } = useThemeStore();
 
+  const { data: liveData } = useQuery(
+    'sidebar-live-streams',
+    () => streamAPI.getLive(),
+    { staleTime: 30 * 1000, refetchInterval: 30 * 1000 }
+  );
+  const liveStreams = liveData?.data?.data ?? [];
+
   const isActive = (path) => {
     return location.pathname === path;
   };
 
   const navItems = [
     { path: '/', icon: FaHome, label: 'Home' },
+    { path: '/streams', icon: IoRadioOutline, label: 'Live', liveCount: liveStreams.length },
     { path: '/browse', icon: FaFire, label: 'Browse' },
   ];
 
@@ -65,7 +76,10 @@ const Sidebar = () => {
               }`}
             >
               <item.icon size={16} />
-              <span>{item.label}</span>
+              <span className="flex-1">{item.label}</span>
+              {item.liveCount > 0 && (
+                <span className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
+              )}
             </Link>
           ))}
         </div>
@@ -85,7 +99,10 @@ const Sidebar = () => {
                 }`}
               >
                 <item.icon size={16} />
-                <span>{item.label}</span>
+                <span className="flex-1">{item.label}</span>
+                {item.live && (
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-red-400 bg-red-500/10 border border-red-500/20 px-1.5 py-0.5 rounded-full">Live</span>
+                )}
               </Link>
             ))}
           </div>

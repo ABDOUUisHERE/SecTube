@@ -13,7 +13,7 @@ const STORAGE_KEY = 'ai_recommended_hidden';
 const AIRecommendedRow = ({ excludeVideoId }) => {
   const trackRef = useRef(null);
   const [hidden, setHidden] = useState(() => localStorage.getItem(STORAGE_KEY) === 'true');
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('aiRecCollapsed') !== 'false');
   const [showHideConfirm, setShowHideConfirm] = useState(false);
   const { addToast } = useToastStore();
 
@@ -72,7 +72,7 @@ const AIRecommendedRow = ({ excludeVideoId }) => {
           )}
 
           <button
-            onClick={() => setCollapsed(c => !c)}
+            onClick={() => setCollapsed(c => { const next = !c; localStorage.setItem('aiRecCollapsed', String(next)); return next; })}
             className="p-1.5 rounded-md bg-dark-800 border border-dark-700 text-gray-400 hover:text-white hover:border-dark-600 transition-colors"
             title={collapsed ? 'Show' : 'Collapse'}
           >

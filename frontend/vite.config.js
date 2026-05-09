@@ -34,6 +34,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\./i,
@@ -42,14 +43,28 @@ export default defineConfig({
               cacheName: 'api-cache',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 // 24 hours
-              }
-            }
-          }
-        ]
+                maxAgeSeconds: 60 * 60 * 24,
+              },
+            },
+          },
+        ],
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-query': ['react-query'],
+          'vendor-ui': ['react-icons', 'recharts'],
+          'vendor-video': ['video.js'],
+          'vendor-socket': ['socket.io-client'],
+          'vendor-misc': ['axios', 'date-fns', 'zustand', 'xss', 'emoji-picker-react'],
+        },
+      },
+    },
+  },
   server: {
     port: 5173,
     proxy: {

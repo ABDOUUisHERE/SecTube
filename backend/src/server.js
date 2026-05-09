@@ -28,6 +28,8 @@ import analyticsRoutes from './routes/analytics.js';
 import adminRoutes from './routes/admin.js';
 import messageRoutes from './routes/messages.js';
 import notificationRoutes from './routes/notifications.js';
+import streamRoutes from './routes/streams.js';
+import { initNMS } from './streaming/nms.js';
 
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -57,6 +59,11 @@ app.use(cors({
 app.use('/videos', express.static(path.join(__dirname, '../videos')));
 app.use('/thumbnails', express.static(path.join(__dirname, '../thumbnails')));
 app.use('/avatars', express.static(path.join(__dirname, '../avatars')));
+app.use('/hls/thumbnails', (req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+}, express.static(path.join(__dirname, '../streams/thumbnails')));
+app.use('/hls', express.static(path.join(__dirname, '../streams')));
 
 // Middleware
 app.use(helmet({
@@ -118,7 +125,7 @@ app.post("/api/mcp/messages", async (req, res) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Sanitize data against NoSQL query injection
+// Prevent NoSQL injection
 app.use(mongoSanitize());
 
 // Setup Swagger (development only)
@@ -145,6 +152,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/streams', streamRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -172,4 +180,5 @@ httpServer.listen(PORT, () => {
   console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   console.log(`🔒 Security features enabled`);
   console.log(`📹 Video platform ready for cyber security content`);
+  initNMS(); // Start RTMP server (non-blocking, warns if unavailable)
 });

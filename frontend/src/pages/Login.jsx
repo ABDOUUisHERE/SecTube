@@ -35,13 +35,11 @@ const Login = () => {
   }, [searchParams, addToast, setSearchParams]);
 
   const handleGithubLogin = () => {
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-    window.location.href = `${backendUrl}/api/auth/github`;
+    window.location.href = '/api/auth/github';
   };
 
   const handleGoogleLogin = () => {
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-    window.location.href = `${backendUrl}/api/auth/google`;
+    window.location.href = '/api/auth/google';
   };
 
   const handleChange = (e) => {

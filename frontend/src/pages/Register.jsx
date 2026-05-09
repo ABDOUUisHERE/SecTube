@@ -36,16 +36,14 @@ const Register = () => {
     if (!acceptedTerms) {
       return addToast({ type: 'warning', message: 'Please agree to the Terms of Use before continuing.' });
     }
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-    window.location.href = `${backendUrl}/api/auth/github`;
+    window.location.href = '/api/auth/github';
   };
 
   const handleGoogleLogin = () => {
     if (!acceptedTerms) {
       return addToast({ type: 'warning', message: 'Please agree to the Terms of Use before continuing.' });
     }
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-    window.location.href = `${backendUrl}/api/auth/google`;
+    window.location.href = '/api/auth/google';
   };
 
   const handleChange = (e) => {

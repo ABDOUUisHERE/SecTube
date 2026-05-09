@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSearch, FaSignOutAlt, FaBars, FaCog, FaVideo, FaGavel, FaCommentAlt, FaBell, FaUserPlus, FaReply } from 'react-icons/fa';
-import { BsStars } from 'react-icons/bs';
+import { BsStars, BsBroadcast } from 'react-icons/bs';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import useAuthStore from '../store/authStore';
@@ -364,14 +364,24 @@ const Navbar = () => {
                       <span>Settings</span>
                     </Link>
                     {user?.isStreamer && (
-                      <Link
-                        to={`/channel/${user?.username}`}
-                        onClick={() => setShowUserMenu(false)}
-                        className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-dark-800 transition text-xs sm:text-sm text-gray-300 hover:text-white"
-                      >
-                        <FaVideo size={12} className="sm:w-[14px] sm:h-[14px]" />
-                        <span>My Channel</span>
-                      </Link>
+                      <>
+                        <Link
+                          to={`/channel/${user?.username}`}
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-dark-800 transition text-xs sm:text-sm text-gray-300 hover:text-white"
+                        >
+                          <FaVideo size={12} className="sm:w-[14px] sm:h-[14px]" />
+                          <span>My Channel</span>
+                        </Link>
+                        <Link
+                          to="/go-live"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 hover:bg-dark-800 transition text-xs sm:text-sm text-gray-300 hover:text-white"
+                        >
+                          <BsBroadcast size={12} className="sm:w-[14px] sm:h-[14px]" />
+                          <span>Go Live</span>
+                        </Link>
+                      </>
                     )}
                   </div>
 

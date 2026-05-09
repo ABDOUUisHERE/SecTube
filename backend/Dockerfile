@@ -1,28 +1,9 @@
 FROM node:20-alpine
-
-# Install FFmpeg for video processing
 RUN apk add --no-cache ffmpeg
-
 WORKDIR /app
-
-# Copy package files and install dependencies
 COPY package*.json ./
-RUN npm install --production
-
-# Copy source files
-COPY . .
-
-# Create necessary directories for storage
-RUN mkdir -p uploads videos thumbnails avatars && \
-    addgroup -S nodejs && adduser -S nodejs -G nodejs && \
-    chown -R nodejs:nodejs /app
-
-USER nodejs
-
-# Expose port
-EXPOSE 5000
-
-# Set environment to production
-ENV NODE_ENV=production
-
-CMD ["npm", "start"]
+RUN npm install --omit=dev
+COPY src ./src
+RUN mkdir -p uploads videos thumbnails avatars streams
+EXPOSE 5000 1935
+CMD ["node", "src/server.js"]

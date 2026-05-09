@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Video from '../models/Video.js';
+import Stream from '../models/Stream.js';
 import { createNotification } from './notificationController.js';
 
 // Get user profile
@@ -377,3 +378,31 @@ export const checkSavedStatus = async (req, res, next) => {
     next(error);
   }
 };
+
+// GET /api/users/me/following-streamers — followed users with live status
+export const getFollowingStreamers = async (req, res, next) => {
+  try {
+    const me = await User.findById(req.user._id)
+      .populate('subscribedTo', 'username displayName avatar isStreamer');
+
+    const streamers = (me?.subscribedTo ?? []).filter((u) => u.isStreamer);
+    const ids = streamers.map((s) => s._id);
+
+    const liveStreams = await Stream.find({ status: 'live', streamer: { $in: ids } })
+      .select('streamer viewerCount title category');
+    const liveMap = new Map(liveStreams.map((s) => [String(s.streamer), s]));
+
+    const result = streamers
+      .map((s) => ({ ...s.toObject(), liveStream: liveMap.get(String(s._id)) || null }))
+      .sort((a, b) => {
+        if (a.liveStream && !b.liveStream) return -1;
+        if (!a.liveStream && b.liveStream) return 1;
+        return (a.displayName || a.username).localeCompare(b.displayName || b.username);
+      });
+
+    res.json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
